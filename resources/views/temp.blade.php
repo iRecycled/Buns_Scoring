@@ -18,7 +18,7 @@
           <main class="w-64 bg-white-100 flex-0 sm:flex-2">
             <div class="bg-blue-100 p-5 rounded-xl">
             <div class="flex flex-wrap justify-center p-5">
-                <H1 class="text-2xl py-4">Add a League!</H1>
+                <h1 class="text-2xl py-4">Add a League!</h1>
                 <button class="p-2 px-5 bg-blue-400 rounded-lg"> Create </button>
             </div>
 
