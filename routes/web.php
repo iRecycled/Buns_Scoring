@@ -34,4 +34,10 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/temp', '\App\Http\Controllers\iRacingIdController@submit')->name('formSubmit');
 
+Route::get('/League/create', function() {
+    return view('League.create');
+});
+
+Route::post('/League/create', '\App\Http\Controllers\LeagueController@create')->name('create');
+
 require __DIR__.'/auth.php';

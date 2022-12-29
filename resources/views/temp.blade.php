@@ -19,7 +19,7 @@
 
             <div class="flex flex-col justify-center p-2 items-center">
                 <h1 class=" text-2xl py-4">Add Race</h1>
-                <a class=" bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" id="modal-button">Create</a>
+                <a class=" bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg" id="modal-button">Add</a>
             </div>
 
                 <!-- Modal container -->
@@ -68,9 +68,10 @@
 
               </script>
 
-          <nav class="flex-1 p-4 sm:w-64">
-            <div class="flex flex-row justify-center p-4 bg-white rounded-xl">
-                <h1 class="text-4xl">Welcome to Buns Scoring!</h1>
+          <div class="flex-1 p-4 sm:w-64">
+            <div class="flex flex-row p-4 bg-white rounded-xl justify-between items-center">
+                <h1 class="text-4xl mx-auto">Welcome to Buns Scoring!</h1>
+                <a href="{{ url('League/create') }}" class="p-2 rounded-xl bg-blue-200">Create a League</a>
             </div>
             <div class="p-5 my-10 bg-red-200 rounded-3xl">
                 <h4 class="text-xl">Created specifically for League Zero scoring</h4>
@@ -78,7 +79,7 @@
             <div>
                 <img src="{{ asset('f3.png') }}">
             </div>
-          </nav>
+        </div>
         </div>
         <footer class="h-48 bg-gray-100">Footer</footer>
       </div>
