@@ -32,12 +32,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::post('/temp', '\App\Http\Controllers\iRacingIdController@submit')->name('formSubmit');
+Route::post('/league/{leagueId}', '\App\Http\Controllers\LeagueController@leagueSessionSubmit')->name('leagueSessionSubmit');
 
-Route::get('/League/create', function() {
-    return view('League.create');
+Route::get('/league/create', function() {
+    return view('league.create');
 });
 
-Route::post('/League/create', '\App\Http\Controllers\LeagueController@create')->name('create');
+Route::post('/league/create', '\App\Http\Controllers\LeagueController@create')->name('create');
+Route::get('/league/{leagueId}/{sessionId?}', '\App\Http\Controllers\LeagueController@show')->name('league.show');
 
 require __DIR__.'/auth.php';

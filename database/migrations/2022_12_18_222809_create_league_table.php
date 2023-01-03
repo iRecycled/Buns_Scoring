@@ -17,6 +17,9 @@ return new class extends Migration
             $table->id();
             $table->string("name");
             $table->string("description");
+            // $table->string("email");
+            // $table->string("password");
+            $table->string("leagueId");
             $table->timestamps();
         });
     }
