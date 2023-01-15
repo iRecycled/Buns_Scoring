@@ -32,13 +32,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::post('/league/{leagueId}', '\App\Http\Controllers\LeagueController@leagueSessionSubmit')->name('leagueSessionSubmit');
 
 Route::get('/league/create', function() {
-    return view('league.create');
+    return view('league.create_league');
 });
 
 Route::post('/league/create', '\App\Http\Controllers\LeagueController@create')->name('create');
-Route::get('/league/{leagueId}/{sessionId?}', '\App\Http\Controllers\LeagueController@show')->name('league.show');
+Route::post('/league/{leagueId}', '\App\Http\Controllers\LeagueController@leagueSessionSubmit')->name('leagueSessionSubmit');
+Route::get('league/{leagueId}', '\App\Http\Controllers\LeagueController@showLeague')->name('league.showLeague');
+Route::get('session/{sessionId}', '\App\Http\Controllers\LeagueController@showSession')->name('session.showSession');
+Route::get('season/{id}', '\App\Http\Controllers\LeagueController@showSeason')->name('season.showSeason');
 
 require __DIR__.'/auth.php';
