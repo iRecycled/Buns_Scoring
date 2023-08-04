@@ -13,7 +13,7 @@
                             <svg aria-hidden="true" class="flex-shrink-0 inline w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
                             <span class="sr-only">Error</span>
                             <div>
-                                <span class="font-medium">There were problems processing your subscription:</span>
+                                <span class="font-medium">There was a problem creating your league</span>
                                 <ul class="mt-1.5 ml-4 text-red-700 list-disc list-inside">
                                     @foreach ($errors->all() as $error)
                                         <li>{!! $error !!}</li>
@@ -48,12 +48,22 @@
                         <div class="flex flex-row p-4 rounded-xl justify-center items-center">
                             <h1 class="text-4xl mx-auto">Create a League</h1>
                         </div>
-                    <form method="POST" action="{{ route('create') }}">
+                    <form method="POST" action="{{ route('createLeague') }}">
                             {{ csrf_field() }}
                         <p class="mt-5"><span class="text-red-600">* </span> League Name</p>
                         <input type="text" name="name" class="text-xl" required>
-                        </span><p class="mt-5"><span class="text-red-600">* </span>League Description</p>
-                        <textarea name="description" class="text-xl" required rows="4" cols="50"></textarea>
+
+                        <p class="mt-5">League Description</p>
+                        <textarea name="description" class="text-xl" rows="4" cols="50"></textarea>
+
+                        <p class="mt-5"><span class="text-red-600">* </span>iRacing League ID</p>
+                        <input type="text" name="leagueId" class="text-xl" required rows="4" cols="50"></textarea>
+
+                        {{-- <p class="mt-5"><span class="text-red-600">* </span>iRacing Email</p>
+                        <input type="email" name="email" class="text-xl" required rows="4" cols="50"></textarea>
+
+                        <p class="mt-5"><span class="text-red-600">* </span>iRacing Password</p>
+                        <input type="password" name="password" class="text-xl" required rows="4" cols="50"></textarea> --}}
                         <br>
                         <button class="mt-5 bg-blue-600 text-white py-2 px-4 rounded-xl hover:bg-blue-700 mb-10">Create</button>
                     </form>

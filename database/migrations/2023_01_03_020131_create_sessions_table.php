@@ -13,13 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('leagues', function (Blueprint $table) {
+        Schema::create('sessions', function (Blueprint $table) {
             $table->id();
-            $table->string("name");
-            $table->string("description",65535);
-            // $table->string("email");
-            // $table->string("password");
-            $table->string("leagueId");
+            $table->integer("subsession_id");
+            $table->text("league_season_name");
+            $table->integer("finish_position");
+            $table->text("display_name");
+            $table->text("simsession_name");
+            $table->integer("league_id");
+            $table->integer("season_id");
             $table->timestamps();
         });
     }
@@ -31,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('leagues');
+        Schema::dropIfExists('sessions');
     }
 };
