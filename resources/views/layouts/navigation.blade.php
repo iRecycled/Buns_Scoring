@@ -29,7 +29,7 @@
                             </x-slot>
 
                             <x-slot name="content">
-                                <x-dropdown-link :href="route('create')">
+                                <x-dropdown-link :href="route('create_league')">
                                     Create League
                                 </x-dropdown-link>
 

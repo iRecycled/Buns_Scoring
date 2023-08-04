@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('leagues', function (Blueprint $table) {
             $table->id();
             $table->string("name");
-            $table->string("description");
+            $table->string("description",65535);
             // $table->string("email");
             // $table->string("password");
             $table->string("leagueId");

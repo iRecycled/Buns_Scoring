@@ -13,15 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('sessions', function (Blueprint $table) {
+        Schema::create('seasons', function (Blueprint $table) {
             $table->id();
-            $table->integer("subsession_id");
-            $table->text("league_season_name");
-            $table->integer("finish_position");
-            $table->text("display_name");
-            $table->text("simsession_name");
-            $table->integer("league_id");
-            $table->integer("season_id");
+            $table->string('season_name');
+            $table->foreignId('league_id');
+            $table->integer('season_count');
             $table->timestamps();
         });
     }
@@ -33,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sessions');
+        Schema::dropIfExists('seasons');
     }
 };

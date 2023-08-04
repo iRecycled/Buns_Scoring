@@ -5,10 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class League extends Model
+class Scoring extends Model
 {
     use HasFactory;
-    public function seasons(){
-        return $this->hasMany(Season::class, 'league_id', 'leagueId');
-    }
 }

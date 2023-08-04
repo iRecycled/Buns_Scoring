@@ -48,7 +48,7 @@
                         <div class="flex flex-row p-4 rounded-xl justify-center items-center">
                             <h1 class="text-4xl mx-auto">Create a League</h1>
                         </div>
-                    <form method="POST" action="{{ route('create') }}">
+                    <form method="POST" action="{{ route('createLeague') }}">
                             {{ csrf_field() }}
                         <p class="mt-5"><span class="text-red-600">* </span> League Name</p>
                         <input type="text" name="name" class="text-xl" required>
