@@ -33,7 +33,7 @@ class LeagueController extends Controller
             //TODO figure out how to test auth without cookies
             if($league->save())
             {
-              return redirect()->route('create')->with('success', 'League created successfully');
+              return redirect()->route('league.showLeague', ['leagueId' => $league->leagueId])->with('success', 'League created successfully');
             }
             else {
               return redirect()->route('create')->withErrors(['message' => 'League failed to create']);
