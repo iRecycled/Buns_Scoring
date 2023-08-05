@@ -59,8 +59,10 @@
                 <div id="modal" class="hidden fixed top-0 left-0 w-full h-full flex items-center justify-center">
                     <!-- Modal content -->
                     <div id="main-modal" class="bg-gray-400 rounded-xl p-3 mx-auto shadow-xl overflow-y-auto">
-                        <form method="POST" action={{ url("/league/" . $league->leagueId . "/" . $seasonId) }} enctype="multipart/form-data">
-                            {{ csrf_field() }}
+                    <!-- enctype="multipart/form-data" -->
+                        <form method="POST" action={{ url("/league/" . $league->leagueId . "/" . $seasonId) }} >
+                            <!-- {{ csrf_field() }} -->
+                            @csrf
                         <button type="button" class="float-right pr-2 close" data-dismiss="main-modal" id="close">&times;</button>
                         <h2 class="text-2xl font-bold py-4 ml-5">Import Session JSON file</h2>
                         <input type="file" class="ml-5" name="json_file" accept=".json">

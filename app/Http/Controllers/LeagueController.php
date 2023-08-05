@@ -110,7 +110,12 @@ class LeagueController extends Controller
 
     public function leagueSessionSubmit(Request $request, $leagueId, $seasonId){
         $file = $request->file('json_file');
-        $json = $file->getContent();
+        info($request->file->extension());
+        if($file){
+          $json = $file->getContent();
+        } else {
+          info('could not get content');
+        }
         $data = json_decode($json);
 
         $sessionId = $data->subsession_id;
