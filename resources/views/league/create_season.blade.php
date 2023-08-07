@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profile Form</title>
   <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <script src="{{ asset('js/create_season.js') }}"></script>
 </head>
 
     <x-app-layout class="flex flex-col min-h-screen">
@@ -19,8 +20,8 @@
                                         <li>{!! $error !!}</li>
                                     @endforeach
                                 </ul>
-                            </div>
-                        </div>
+                </div>
+            </div>
                     @endif
 
                     @if (session()->has('success'))
@@ -57,22 +58,33 @@
                         <div class="flex flex-row p-4 rounded-xl justify-center items-center">
                             <h1 class="text-4xl mx-auto">Season Scoring</h1>
                         </div>
+                        <div class="flex justify-center pb-8">
+                        <div class="text-sm font-medium text-center">
+                            <ul class="flex flex-wrap -mb-px">
+                                <li class="mr-2">
+                                    <a href="#" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="qualifying">Qualifying</a>
+                                </li>
+                                <li class="mr-2">
+                                    <a href="#" class="tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500" aria-current="page" data-tab="heats">Heats</a>
+                                </li>
+                                <li class="mr-2">
+                                    <a href="#" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="consolation">Consolation</a>
+                                </li>
+                                <li class="mr-2">
+                                    <a href="#" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="feature">Feature (Main)</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
                         <div class="grid grid-cols-4 grid-flow-row gap-2">
-                            @for ($i = 1; $i < 64; $i++)
-                            <div class="flex items-center w-auto">
-                                <p class="p-2">#{{$i}}</p>
-                                <input type="text" name="column{{$i}}[]" class="bg-black rounded-lg w-14" value="0">
+                            @for ($i = 1; $i <= 60; $i++)
+                            <div class="grid grid-cols-4 items-center">
+                                <p>#{{$i}}</p>
+                                <input type="text" name="column{{$i}}[]" class="rounded-lg w-14" value="0">
                             </div>
                             @endfor
                         </div>
-                        {{-- @for($i = 1; $i < 64; $i++)
-                                <tr class="text-center p-2">
-                                  <td class="border px-4 py-2">{{$i}}</td>
-                                  <td class="border px-4 py-2">
-                                    <input type="text" name="column{{$i}}[]" class="bg-black rounded-lg p-2">
-                                  </td>
-                                </tr>
-                        @endfor --}}
                         <br>
                         <button class="mt-5 bg-blue-600 text-white py-2 px-4 rounded-xl hover:bg-blue-700 mb-10">Create</button>
                     </form>

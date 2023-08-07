@@ -20,7 +20,7 @@
           <div class="flex-1 p-4 sm:w-64">
             <div class="flex flex-row p-4 bg-white rounded-xl justify-between items-center">
                 <h1 class="text-4xl mx-auto">Welcome to Buns Scoring!</h1>
-                <a href="{{ url('league/create') }}" class="p-2 rounded-xl bg-blue-200">Create a League</a>
+                <a href="league/create-league" class="p-2 rounded-xl bg-blue-200">Create a League</a>
             </div>
                 <div class="p-5 my-10 bg-red-200 rounded-3xl">
                     <h4 class="text-xl">Current Leagues: </h4>

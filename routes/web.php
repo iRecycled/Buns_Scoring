@@ -33,13 +33,13 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::post('/league/createLeague', '\App\Http\Controllers\LeagueController@createLeague')->name('createLeague');
-Route::post('/league/{leagueId}/createSeason', '\App\Http\Controllers\LeagueController@createSeason')->name('createSeason');
+Route::post('/league/{leagueId}/createSeason', '\App\Http\Controllers\SeasonController@createSeason')->name('createSeason');
 Route::post('/league/{leagueId}/{seasonId}', '\App\Http\Controllers\LeagueController@leagueSessionSubmit')->name('leagueSessionSubmit');
 
 Route::get('/league/create-league', function() {return view('league.create_league');})->name('create_league');
-Route::get('/league/{leagueId}/create-season', '\App\Http\Controllers\LeagueController@create_season')->name('create_season');
+Route::get('/league/{leagueId}/create-season', '\App\Http\Controllers\SeasonController@create_season')->name('create_season');
 Route::get('league/{leagueId}', '\App\Http\Controllers\LeagueController@showLeague')->name('league.showLeague');
 Route::get('session/{sessionId}', '\App\Http\Controllers\LeagueController@showSession')->name('session.showSession');
-Route::get('season/{id}', '\App\Http\Controllers\LeagueController@showSeason')->name('season.showSeason');
+Route::get('season/{id}', '\App\Http\Controllers\SeasonController@showSeason')->name('season.showSeason');
 
 require __DIR__.'/auth.php';

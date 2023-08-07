@@ -14,4 +14,7 @@ class Season extends Model
     public function season(){
         return $this->hasMany(Session::class, 'id', 'season_id');
     }
+    public function scorings(){
+        return $this->hasMany(Scoring::class, 'season_id', 'id');
+    }
 }

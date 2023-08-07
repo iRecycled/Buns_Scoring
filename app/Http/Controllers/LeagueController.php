@@ -43,42 +43,12 @@ class LeagueController extends Controller
           }
     }
 
-    public function createSeason(Request $request)
-    {
-        $request->validate([
-            'season_name' => 'required',
-        ]);
-        $season = new Season();
-        $season->season_name = $request->season_name;
-        $season->league_id = $request->leagueId;
-        $season->season_count = $request->season_count;
-
-        try {
-            if($season->save())
-            {
-            echo $season->id;
-              return redirect()->route('league.showLeague', ['leagueId' => $season->league_id])->with('success', 'Season created successfully');
-            }
-            else {
-              return redirect()->back()->withErrors(['message' => 'Season failed to create']);
-            }
-          } catch (Exception $e){
-            return redirect()->back()->withErrors($e->getMessage());
-          }
-    }
-
     public function showLeague($leagueId){
         $seasons = Season::where('league_id',$leagueId)->distinct()->get();
         return view('league.home', compact(
             'leagueId',
             'seasons',
         ));
-    }
-
-    public function create_season($leagueId){
-        $league = League::where('leagueId', $leagueId)->get();
-        $count = Season::where('league_id', $leagueId)->count();
-        return view('league.create_season', compact('league', 'count'));
     }
 
     public function showSession($sessionId){
@@ -96,27 +66,16 @@ class LeagueController extends Controller
       ));
     }
 
-    public function showSeason($seasonId){
-        $seasons = Season::where('id',$seasonId)->distinct()->get();
-        $league = $seasons->first()->league;
-        $leagues_sessions = Session::where('league_id', $league->leagueId)->where('season_id',$seasonId)->get();
-        $unique_leagues_sessions = $leagues_sessions->unique('subsession_id');
-        return view('season.season', compact(
-            'seasonId',
-            'unique_leagues_sessions',
-            'league',
-        ));
-    }
-
     public function leagueSessionSubmit(Request $request, $leagueId, $seasonId){
+      info($request->file('json_file'));
+      if($request->file('json_file')){
         $file = $request->file('json_file');
-        info($request->file->extension());
-        if($file){
-          $json = $file->getContent();
-        } else {
-          info('could not get content');
-        }
+        $json = $file->getContent();
         $data = json_decode($json);
+      }
+      else {
+        return redirect()->back()->withErrors(['message' => 'Failed to load file']);
+      }
 
         $sessionId = $data->subsession_id;
         $leagueIdInJson = $data->league_id;// ?? 'null';
@@ -141,8 +100,6 @@ class LeagueController extends Controller
         }
         DB::table('sessions')->insert($records);
         return redirect()->route('session.showSession', ['sessionId' => $sessionId])
-        ->with(compact(
-            'leagueId',
-        ));
+        ->with(compact('leagueId'));
     }
 }

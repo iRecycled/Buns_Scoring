@@ -11,4 +11,8 @@ class League extends Model
     public function seasons(){
         return $this->hasMany(Season::class, 'league_id', 'leagueId');
     }
+
+    public function scorings(){
+        return $this->hasMany(Scoring::class, 'league_id', 'leagueId');
+    }
 }
