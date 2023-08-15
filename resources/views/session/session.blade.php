@@ -44,9 +44,14 @@
                             var row = document.createElement("tr");
                             var finish_position = document.createElement("td");
                             finish_position.innerHTML = element.finish_position;
+
+                            var race_points = document.createElement("td");
+                            race_points.innerHTML = element.race_points;
+
                             var display_name = document.createElement("td");
                             display_name.innerHTML = element.display_name;
                             row.appendChild(finish_position);
+                            row.appendChild(race_points);
                             row.appendChild(display_name);
                             table.appendChild(row);
                         });
@@ -67,11 +72,12 @@
                     <div class="bg-gray-300 py-4 px-8 rounded-3xl">
                         <div class="flex flex-row p-4 rounded-xl justify-center items-center">
                                 <tr class="m-2">
-                                  <table class="pl-2" id="racers_table">
+                                  <table class="pl-2 text-center" id="racers_table">
                                     <thead>
                                       <tr>
-                                        <th class="pr-10">Pos</th>
-                                        <th class="pr-10 ">Driver</th>
+                                        <th class="px-4">Pos</th>
+                                        <th class="px-6">Race Points</th>
+                                        <th class="px-10">Driver</th>
                                       </tr>
                                     </thead>
                                     <tbody>
@@ -79,6 +85,7 @@
                                         @foreach ($sessions as $user)
                                         <tr>
                                           <td>{{ $user->finish_position }}</td>
+                                          <td>{{ $user->race_points }}</td>
                                           <td>{{ $user->display_name }}</td>
                                         </tr>
                                       @endforeach

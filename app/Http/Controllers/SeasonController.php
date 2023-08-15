@@ -6,6 +6,7 @@ use App\Models\League;
 use App\Models\Session;
 use App\Models\Season;
 use App\Models\Scoring;
+use Illuminate\Support\Facades\DB;
 
 class SeasonController extends Controller
 {
@@ -18,22 +19,17 @@ class SeasonController extends Controller
         $season->season_name = $request->season_name;
         $season->league_id = $request->leagueId;
         $season->season_count = $request->season_count;
-        $season->save();
-
-        // $seasonId = Season::where('league_id', $request->$leagueId)
-        //        ->orderBy('created_at', 'desc') // Assuming you want the most recent season
-        //        ->first();
 
         $scoringInput = $request->input('scoring_column');
         $json = json_encode($scoringInput);
         $score = new Scoring();
-        $score->season_id = $season->id;
         $score->league_id = $request->leagueId;
         $score->scoring_json = $json;
 
         try {
+          $season->save();
+          $score->season_id = $season->id;
           $score->save();
-          //echo $season->id;
           return redirect()->route('league.showLeague', ['leagueId' => $season->league_id])->with('success', 'Season created successfully');
         } catch(Exception $e){
           return redirect()->back()->withErrors(['message' => 'Season failed to create']);
@@ -56,6 +52,15 @@ class SeasonController extends Controller
             'unique_leagues_sessions',
             'league',
         ));
+    }
+
+    public function showStandings($seasonId){
+      $standings = DB::table('sessions')
+      ->select('display_name', DB::raw('SUM(race_points) as total_points'))
+      ->where('season_id', $seasonId)
+      ->groupBy('display_name')
+      ->get();
+      return view ('season.standings.standings', compact('seasonId', 'standings'));
     }
     
 }

@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\League;
 use App\Models\Session;
 use App\Models\Season;
+use App\Models\Scoring;
 use Exception;
 // use iRacingPHP\iRacing;
 use Illuminate\Support\Facades\DB;
@@ -80,26 +81,31 @@ class LeagueController extends Controller
 
         $sessionId = $data->subsession_id;
         $leagueIdInJson = $data->league_id;// ?? 'null';
-        $league_season_name = $data->league_season_name;// ?? NULL;
         $results = $data->session_results;
-        $records = [];
+        $scoringQuery = Scoring::where('league_id', $leagueId)
+               ->where('season_id', $seasonId)
+               ->first();
+        $seasonJsonData = json_decode($scoringQuery->scoring_json, true);
         foreach($results as $result){
             //sim session is a race (6)
             if($result->simsession_type === 6){
                 foreach($result->results as $result2){
-                    $records[] = [
+                    $record = [
                         'subsession_id' => $sessionId,
                         'simsession_name' => $result->simsession_name,
-                        'league_season_name' => $league_season_name,
                         'finish_position' => ++$result2->finish_position,
+                        'race_points' => $seasonJsonData[$result2->finish_position],
                         'display_name' => $result2->display_name,
                         'league_id' => $leagueId,
                         'season_id' => $seasonId
                     ];
+                DB::table('sessions')->updateOrInsert([
+                    'simsession_name' => $result->simsession_name,
+                    'finish_position' => $result2->finish_position,
+                    'subsession_id' => $sessionId], $record);
                 }
             }
         }
-        DB::table('sessions')->insert($records);
         return redirect()->route('session.showSession', ['sessionId' => $sessionId])
         ->with(compact('leagueId'));
     }

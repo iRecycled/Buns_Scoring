@@ -16,7 +16,6 @@ return new class extends Migration
         Schema::create('sessions', function (Blueprint $table) {
             $table->id();
             $table->integer("subsession_id");
-            $table->text("league_season_name");
             $table->integer("finish_position");
             $table->integer("race_points");
             $table->text("display_name");

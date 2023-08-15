@@ -76,7 +76,7 @@
                                 <thead>
                                   <tr>
                                     <th class="border-b border-black pr-2 pl-2">Session Name</th>
-                                    <th class="border-b border-l border-black">Session ID</th>
+                                    <th class="border-b border-l pr-2 pl-2 border-black">Session ID</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -88,11 +88,12 @@
                                         </td>
                                       </tr>
                                     @endforeach
-
                                 </tbody>
                               </table>
-
                         </div>
+                        <div class="pt-2 text-center">
+                                <a href="{{$seasonId}}/standings" class="text-black" > Season Standings </a>
+                            </div>
                     </div>
             </div>
             <div>

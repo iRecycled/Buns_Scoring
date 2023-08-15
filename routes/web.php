@@ -41,5 +41,6 @@ Route::get('/league/{leagueId}/create-season', '\App\Http\Controllers\SeasonCont
 Route::get('league/{leagueId}', '\App\Http\Controllers\LeagueController@showLeague')->name('league.showLeague');
 Route::get('session/{sessionId}', '\App\Http\Controllers\LeagueController@showSession')->name('session.showSession');
 Route::get('season/{id}', '\App\Http\Controllers\SeasonController@showSeason')->name('season.showSeason');
+Route::get('season/{id}/standings', '\App\Http\Controllers\SeasonController@showStandings');
 
 require __DIR__.'/auth.php';
