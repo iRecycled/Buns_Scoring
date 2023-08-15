@@ -17,8 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('league_id');
             $table->foreignId('season_id');
-            $table->integer('position');
-            $table->integer('points');
+            $table->text('scoring_json');
             $table->timestamps();
         });
     }

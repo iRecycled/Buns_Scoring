@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\League;
 use App\Models\Session;
 use App\Models\Season;
+use App\Models\Scoring;
 
 class SeasonController extends Controller
 {
@@ -17,19 +18,26 @@ class SeasonController extends Controller
         $season->season_name = $request->season_name;
         $season->league_id = $request->leagueId;
         $season->season_count = $request->season_count;
+        $season->save();
+
+        // $seasonId = Season::where('league_id', $request->$leagueId)
+        //        ->orderBy('created_at', 'desc') // Assuming you want the most recent season
+        //        ->first();
+
+        $scoringInput = $request->input('scoring_column');
+        $json = json_encode($scoringInput);
+        $score = new Scoring();
+        $score->season_id = $season->id;
+        $score->league_id = $request->leagueId;
+        $score->scoring_json = $json;
 
         try {
-            if($season->save())
-            {
-            echo $season->id;
-              return redirect()->route('league.showLeague', ['leagueId' => $season->league_id])->with('success', 'Season created successfully');
-            }
-            else {
-              return redirect()->back()->withErrors(['message' => 'Season failed to create']);
-            }
-          } catch (Exception $e){
-            return redirect()->back()->withErrors($e->getMessage());
-          }
+          $score->save();
+          //echo $season->id;
+          return redirect()->route('league.showLeague', ['leagueId' => $season->league_id])->with('success', 'Season created successfully');
+        } catch(Exception $e){
+          return redirect()->back()->withErrors(['message' => 'Season failed to create']);
+        }        
     }
 
     public function create_season($leagueId){

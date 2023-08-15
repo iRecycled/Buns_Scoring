@@ -24,6 +24,7 @@ class LeagueController extends Controller
 
         $league = new League();
         $league->name = $request->name;
+        $league->description = "";
         if($request->description){
           $league->description = $request->description;
         }

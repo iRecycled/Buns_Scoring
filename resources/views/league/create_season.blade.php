@@ -81,7 +81,7 @@
                             @for ($i = 1; $i <= 60; $i++)
                             <div class="grid grid-cols-4 items-center">
                                 <p>#{{$i}}</p>
-                                <input type="text" name="column{{$i}}[]" class="rounded-lg w-14" value="0">
+                                <input type="text" name="scoring_column[{{$i}}]" class="rounded-lg w-14" value="0">
                             </div>
                             @endfor
                         </div>
