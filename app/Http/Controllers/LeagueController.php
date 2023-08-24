@@ -52,46 +52,4 @@ class LeagueController extends Controller
             'seasons',
         ));
     }
-
-    public function leagueSessionSubmit(Request $request, $leagueId, $seasonId){
-      info($request->file('json_file'));
-      if($request->file('json_file')){
-        $file = $request->file('json_file');
-        $json = $file->getContent();
-        $data = json_decode($json);
-      }
-      else {
-        return redirect()->back()->withErrors(['message' => 'Failed to load file']);
-      }
-
-        $sessionId = $data->subsession_id;
-        $leagueIdInJson = $data->league_id;// ?? 'null';
-        $results = $data->session_results;
-        $scoringQuery = Scoring::where('league_id', $leagueId)
-               ->where('season_id', $seasonId)
-               ->first();
-        $seasonJsonData = json_decode($scoringQuery->scoring_json, true);
-        foreach($results as $result){
-            //sim session is a race (6)
-            if($result->simsession_type === 6){
-                foreach($result->results as $result2){
-                    $record = [
-                        'subsession_id' => $sessionId,
-                        'simsession_name' => $result->simsession_name,
-                        'finish_position' => ++$result2->finish_position,
-                        'race_points' => $seasonJsonData[$result2->finish_position],
-                        'display_name' => $result2->display_name,
-                        'league_id' => $leagueId,
-                        'season_id' => $seasonId
-                    ];
-                DB::table('sessions')->updateOrInsert([
-                    'simsession_name' => $result->simsession_name,
-                    'finish_position' => $result2->finish_position,
-                    'subsession_id' => $sessionId], $record);
-                }
-            }
-        }
-        $url = url('session/'. $sessionId);
-        return redirect($url)->with(compact('leagueId'));
-    }
 }

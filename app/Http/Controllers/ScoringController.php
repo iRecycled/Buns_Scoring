@@ -8,6 +8,7 @@ use App\Models\Session;
 use App\Models\Season;
 use App\Models\Scoring;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class ScoringController extends Controller
 {

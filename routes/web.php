@@ -34,7 +34,8 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/league/createLeague', '\App\Http\Controllers\LeagueController@createLeague')->name('createLeague');
 Route::post('/league/{leagueId}/createSeason', '\App\Http\Controllers\SeasonController@createSeason')->name('createSeason');
-Route::post('/league/{leagueId}/{seasonId}', '\App\Http\Controllers\LeagueController@leagueSessionSubmit')->name('leagueSessionSubmit');
+Route::post('/league/{leagueId}/{seasonId}', '\App\Http\Controllers\SeasonController@newSessionSubmit');
+Route::post('season/{id}/scoring', '\App\Http\Controllers\SeasonController@updateScoring');
 
 Route::get('/league/create-league', function() {return view('league.create_league');})->name('create_league');
 Route::get('/league/{leagueId}/create-season', '\App\Http\Controllers\SeasonController@create_season')->name('create_season');

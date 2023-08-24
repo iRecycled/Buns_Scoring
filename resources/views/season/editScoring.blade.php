@@ -49,7 +49,7 @@
           <div class="flex-1 p-4 sm:w-64">
             <div class="p-5 my-10  flex justify-center items-center">
                 <div class="bg-gray-300 py-4 px-8 rounded-3xl">
-                    <form method="POST" action="">
+                    <form method="POST" action={{ url("/season/" . $season[0]->id) . "/scoring" }} enctype="multipart/form-data">
                             {{ csrf_field() }}
                         <br>
                         <div class="flex flex-row p-4 rounded-xl justify-center items-center">
@@ -77,7 +77,7 @@
                             @for ($i = 1; $i <= 60; $i++)
                                 <div class="grid grid-cols-4 items-center">
                                     <p class="rounded-lg w-14">#{{$i}}</p>
-                                    <input type="text" name="scoring_column[{{$i}}]" class="rounded-lg w-14" value={{ $qualifying[$i] }}></input>
+                                    <input type="text" name="qualifying_data[{{$i}}]" class="rounded-lg w-14" value={{ $qualifying[$i] }}></input>
                                 </div>
                             @endfor
                         </div>
@@ -85,7 +85,7 @@
                             @for ($i = 1; $i <= 60; $i++)
                                 <div class="grid grid-cols-4 items-center">
                                     <p class="rounded-lg w-14">#{{$i}}</p>
-                                    <input type="text" name="scoring_column[{{$i}}]" class="rounded-lg w-14" value={{ $heat[$i] }}></input>
+                                    <input type="text" name="heat_data[{{$i}}]" class="rounded-lg w-14" value={{ $heat[$i] }}></input>
                                 </div>
                             @endfor
                         </div>
@@ -94,7 +94,7 @@
                                 @for ($i = 1; $i <= 60; $i++)
                                     <div class="grid grid-cols-4 items-center">
                                         <p class="rounded-lg w-14">#{{$i}}</p>
-                                        <input type="text" name="scoring_column[{{$i}}]" class="rounded-lg w-14" value={{ $consolation[$i] }}></input>
+                                        <input type="text" name="consolation_data[{{$i}}]" class="rounded-lg w-14" value={{ $consolation[$i] }}></input>
                                     </div>
                                 @endfor
                             </div>
@@ -103,7 +103,7 @@
                             @for ($i = 1; $i <= 60; $i++)
                                 <div class="grid grid-cols-4 items-center">
                                     <p class="rounded-lg w-14">#{{$i}}</p>
-                                    <input type="text" name="scoring_column[{{$i}}]" class="rounded-lg w-14" value={{ $feature[$i] }}></input>
+                                    <input type="text" name="feature_data[{{$i}}]" class="rounded-lg w-14" value={{ $feature[$i] }}></input>
                                 </div>
                             @endfor
                         </div>

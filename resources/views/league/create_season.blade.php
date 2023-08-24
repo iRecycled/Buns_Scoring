@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profile Form</title>
   <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
-  <script src="{{ asset('js/create_season.js') }}"></script>
 </head>
 
     <x-app-layout class="flex flex-col min-h-screen">
@@ -62,29 +61,55 @@
                         <div class="text-sm font-medium text-center">
                             <ul class="flex flex-wrap -mb-px">
                                 <li class="mr-2">
-                                    <a href="#" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="qualifying">Qualifying</a>
+                                    <button type="button" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="tabs" id="qualifying">Qualifying</button>
                                 </li>
                                 <li class="mr-2">
-                                    <a href="#" class="tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500" aria-current="page" data-tab="heats">Heats</a>
+                                    <button type="button" class="tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500" aria-current="page" data-tab="tabs" id="heats">Heats</button>
                                 </li>
                                 <li class="mr-2">
-                                    <a href="#" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="consolation">Consolation</a>
+                                    <button type="button" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="tabs" id="consolation">Consolation</button>
                                 </li>
                                 <li class="mr-2">
-                                    <a href="#" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="feature">Feature (Main)</a>
+                                    <button type="button" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="tabs" id="feature">Feature (Main)</button>
                                 </li>
                             </ul>
                         </div>
                     </div>
 
-                        <div class="grid grid-cols-4 grid-flow-row gap-2">
-                            @for ($i = 1; $i <= 60; $i++)
+                    <div class="grid grid-cols-4 grid-flow-row gap-2 hidden" id="qualifyingBody">
+                        @for ($i = 1; $i <= 60; $i++)
                             <div class="grid grid-cols-4 items-center">
-                                <p>#{{$i}}</p>
-                                <input type="text" name="scoring_column[{{$i}}]" class="rounded-lg w-14" value="0">
+                                <p class="rounded-lg w-14">#{{$i}}</p>
+                                <input type="text" name="qualifying_data[{{$i}}]" class="rounded-lg w-14" value="0"></input>
                             </div>
+                        @endfor
+                    </div>
+                    <div class="grid grid-cols-4 grid-flow-row gap-2" id="heatBody">
+                        @for ($i = 1; $i <= 60; $i++)
+                            <div class="grid grid-cols-4 items-center">
+                                <p class="rounded-lg w-14">#{{$i}}</p>
+                                <input type="text" name="heat_data[{{$i}}]" class="rounded-lg w-14" value="0"></input>
+                            </div>
+                        @endfor
+                    </div>
+                    <div>
+                        <div class="grid grid-cols-6 gap-2 items-center hidden" id="consolationBody">
+                            @for ($i = 1; $i <= 60; $i++)
+                                <div class="grid grid-cols-4 items-center">
+                                    <p class="rounded-lg w-14">#{{$i}}</p>
+                                    <input type="text" name="consolation_data[{{$i}}]" class="rounded-lg w-14" value="0"></input>
+                                </div>
                             @endfor
                         </div>
+                    </div>
+                    <div class="grid grid-cols-6 gap-2 items-center hidden" id="featureBody">
+                        @for ($i = 1; $i <= 60; $i++)
+                            <div class="grid grid-cols-4 items-center">
+                                <p class="rounded-lg w-14">#{{$i}}</p>
+                                <input type="text" name="feature_data[{{$i}}]" class="rounded-lg w-14" value="0"></input>
+                            </div>
+                        @endfor
+                    </div>
                         <br>
                         <button class="mt-5 bg-blue-600 text-white py-2 px-4 rounded-xl hover:bg-blue-700 mb-10">Create</button>
                     </form>
@@ -102,5 +127,47 @@
       </div>
 </x-app-layout>
 </html>
+
+<script>
+    const listItems = document.querySelectorAll('.tab-link');
+
+    listItems.forEach(item => {
+        item.addEventListener('click', () => {
+            // Get the value of the 'data-tab' attribute
+            const tab = item.getAttribute('id');
+            // Update the content based on the clicked tab
+            const allTabs = document.querySelectorAll('[data-tab="tabs"]');
+            const qualifyingBody = document.getElementById('qualifyingBody');
+            const heatBody = document.getElementById('heatBody');
+            const consolationBody = document.getElementById('consolationBody');
+            const featureBody = document.getElementById('featureBody');
+            const bodys = [qualifyingBody, heatBody, consolationBody, featureBody];
+            bodys.forEach(bod => {
+                bod.classList.add('hidden');
+            })
+            allTabs.forEach(tab => {
+                tab.className = "text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700";
+            })
+            if (tab === 'qualifying') {
+                qualifyingBody.className = "grid grid-cols-4 grid-flow-row gap-2";
+                const qualifying = document.getElementById('qualifying');
+                qualifying.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500";
+            } else if (tab === 'heats') {
+                heatBody.className = "grid grid-cols-4 grid-flow-row gap-2";
+                const heat = document.getElementById('heats');
+                heat.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500";
+            } else if (tab === 'consolation') {
+                consolationBody.className = "grid grid-cols-4 grid-flow-row gap-2";
+                consolationBody.style.display = 'visible';
+                const consolation = document.getElementById('consolation');
+                consolation.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500";
+            } else if (tab === 'feature') {
+                featureBody.className = "grid grid-cols-4 grid-flow-row gap-2";
+                const feature = document.getElementById('feature');
+                feature.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500";
+            }
+        });
+    });
+    </script>
 
 

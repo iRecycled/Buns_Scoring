@@ -26,7 +26,6 @@ class SessionController extends Controller
 
     public function getSeason($subsession_id){
         $season_id = Session::select('season_id')->where('subsession_id', $subsession_id)->first();
-        $season_id = 10;
         return redirect()->route('season.showSeason', ['id', $season_id]);
     }
 }
