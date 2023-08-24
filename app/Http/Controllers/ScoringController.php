@@ -22,16 +22,9 @@ class ScoringController extends Controller
 
         try {
             $score->save();
-        } 
+        }
         catch (Exception $e) {
             return redirect()->back()->withErrors($e->getMessage());
         }
-    }
-    
-    public function calculateScoringForSingleSession($league_id, $season_id, $session_id) {
-        $scoringRules = DB::table('scoring')->where('league_id', $league_id)
-        ->where('season_id', $season_id)
-        ->orderBy('position')
-        ->pluck('points', 'position');
     }
 }

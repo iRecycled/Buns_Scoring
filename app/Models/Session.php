@@ -12,4 +12,8 @@ class Session extends Model
     public function league() {
         return $this->belongsTo(League::class, 'league_id', 'leagueId');
     }
+
+    public function season() {
+        return $this->belongsTo(Season::class);
+    }
 }

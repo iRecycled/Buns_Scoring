@@ -39,14 +39,18 @@
     @endif
         <div class="flex flex-row flex-1">
           <main class="w-64 bg-white-100 flex-0 sm:flex-2">
-
-
           </main>
           <div class="flex-1 p-4 sm:w-64">
+            <div class="flex items-center">
+                <a href="/league/{{ $league->leagueId }}" class="text-blue-500 underline p-2"> League </a> >
+            </div>
             <div class="p-4 bg-white rounded-xl items-center justify-content-between">
                 <div class="flex flex-row items-center">
                     <div class="flex flex-1 pl-32 items-center justify-center">
                         <h1 class="text-4xl font-bold text-center">{{ $league->name }}</h1>
+                    </div>
+                    <div class="pr-6">
+                        <a href="/season/{{$seasonId}}/scoring", class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Edit Scoring</a>
                     </div>
                     <div>
                         <button href="" id="modal-button" class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Import session</button>
@@ -84,7 +88,7 @@
                                     <tr>
                                         <td class="pr-1 pl-2">Session 1</td>
                                         <td class="border-l border-black">
-                                            <a href="{{ route('session.showSession', ['sessionId' => $sessions->subsession_id]) }} " class="text-blue-500 underline p-2"> {{  $sessions->subsession_id }} </a>
+                                            <a href="/session/{{ $sessions->subsession_id }}" class="text-blue-500 underline p-2"> {{  $sessions->subsession_id }} </a>
                                         </td>
                                       </tr>
                                     @endforeach

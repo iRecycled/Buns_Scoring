@@ -20,8 +20,8 @@
                                         <li>{!! $error !!}</li>
                                     @endforeach
                                 </ul>
-                </div>
-            </div>
+                            </div>
+                        </div>
                     @endif
 
                     @if (session()->has('success'))

@@ -14,6 +14,11 @@
 
           </main>
           <div class="flex-1 p-4 sm:w-64">
+            <div class="flex items-center">
+                <a href="/league/{{ $league->leagueId }}" class="text-blue-500 underline p-2"> League </a>
+                <p> > </p>
+                <a href="/season/{{ $seasonId }}" class="text-blue-500 underline p-2"> Season </a>
+            </div>
             <div class="p-4 bg-white rounded-xl items-center justify-content-between">
                 <div class="flex flex-row items-center">
                     <div class="flex flex-1 items-center justify-center">

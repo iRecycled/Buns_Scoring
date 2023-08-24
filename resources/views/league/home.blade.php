@@ -53,6 +53,7 @@
                     </div>
                     <div>
                         <a href="{{route('create_season', ['leagueId' => $league->leagueId])}}" id="modal-button" class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Create Season</a>
+
                     </div>
                 </div>
                 <p class="text-lg my-3 mx-auto text-center">{{ $league->description }}</p>

@@ -53,21 +53,6 @@ class LeagueController extends Controller
         ));
     }
 
-    public function showSession($sessionId){
-      $sessions = Session::where('subsession_id',$sessionId)->distinct()->get();
-      $league = $sessions->first()->league;
-      $unique_types = $sessions->unique('simsession_name');
-      foreach($unique_types as $type) {
-          $types[] = $type->simsession_name;
-      }
-      return view('session.session', compact(
-          'sessions',
-          'sessionId',
-          'types',
-          'league',
-      ));
-    }
-
     public function leagueSessionSubmit(Request $request, $leagueId, $seasonId){
       info($request->file('json_file'));
       if($request->file('json_file')){
@@ -106,7 +91,7 @@ class LeagueController extends Controller
                 }
             }
         }
-        return redirect()->route('session.showSession', ['sessionId' => $sessionId])
-        ->with(compact('leagueId'));
+        $url = url('session/'. $sessionId);
+        return redirect($url)->with(compact('leagueId'));
     }
 }
