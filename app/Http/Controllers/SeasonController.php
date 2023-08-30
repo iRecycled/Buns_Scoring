@@ -74,6 +74,7 @@ class SeasonController extends Controller
                     $scoring->save();
                 }
             DB::commit();
+            $this->updateRacePoints($seasonId);
             return redirect("/season/". $seasonId)->with('success', 'Scoring updated successfully');
         }
         catch(Exception $e){
@@ -159,19 +160,71 @@ class SeasonController extends Controller
                         'race_points' => 0,
                         'display_name' => $realResults->display_name,
                         'league_id' => $leagueId,
-                        'season_id' => $seasonId
+                        'season_id' => $seasonId,
+                        'laps_lead' => $realResults->laps_lead,
+                        'laps_completed' => $realResults->laps_complete,
+                        'average_lap_time' => $this->convertTime($realResults->average_lap),
+                        'best_lap_time' => $this->convertTime($realResults->best_lap_time),
+                        'best_lap_number' => $realResults->best_lap_num,
+                        'qualifying_lap_time' => $this->convertTime($realResults->best_qual_lap_time),
+                        'starting_pos' => ++$realResults->starting_position,
+                        'interval' => $this->convertTime($realResults->interval, 10),
+                        'incidents' => $realResults->incidents,
+                        'club_name' => $realResults->club_name
                     ];
                   DB::table('sessions')->updateOrInsert([
                       'simsession_name' => $result->simsession_name,
                       'finish_position' => $realResults->finish_position,
+                      'license_category' => $data->license_category,
+                      'corners_per_lap' => $data->corners_per_lap,
+                      'track_name' => $data->track->track_name,
+                      'config_name' => $data->track->config_name,
+                      'temp_value' => $data->weather->temp_value,
+                      'temp_units' => $data->weather->temp_units,
+                      'rel_humidity' => $data->weather->rel_humidity,
                       'subsession_id' => $sessionId], $record);
                   }
                 }
           }
+          $this->setIntervalByLeader($sessionId);
           $this->updateRacePoints($seasonId);
           $url = url('session/'. $sessionId);
           return redirect($url)->with(compact('leagueId'));
       }
+
+      private function convertTime($time){
+        if($time <= 0) return null;
+        $minutes = floor((int) substr($time, 0, -4) / 60);
+        $seconds = (int) substr( $time, 0 , -4) % 60;
+        $milliseconds = (int) substr($time, -4, 3);
+        if($minutes == 0){
+            return sprintf('%02d.%03d', $seconds, $milliseconds);
+        }
+        return sprintf('%d:%02d.%03d', $minutes, $seconds, $milliseconds);
+      }
+
+      //TODO getting leader lap count is hard
+      private function calcInterval($simsession_name, $subsession_id, $leadersLapsComplete){
+      $sessions = Session::where('simsession_name', $simsession_name)->where('subsession_id', $subsession_id)->get(['id','finish_position', 'interval', 'laps_completed']);
+        foreach ($sessions as $race) {
+            if($race->interval == null && $race->finish_position !== 1){
+                $lapsBehind = $leadersLapsComplete - $race->laps_completed;
+                $race->interval = "-" . abs($lapsBehind) . " laps";
+            }
+            else {
+                $race->interval = "-" . $race->interval;
+            }
+            Session::where('id', $race->id)->update(['interval' => $race->interval]);
+        }
+      }
+
+      private function setIntervalByLeader($subsession_id){
+        $leaders = Session::where('subsession_id', $subsession_id)->where('finish_position', 1)->get(['laps_completed', 'interval', 'simsession_name']);
+        //at most loops 5 times.
+        foreach ($leaders as $leader) {
+            $this->calcInterval($leader->simsession_name, $subsession_id, $leader->laps_completed);
+        }
+    }
 
       private function updateRacePoints($seasonId){
         $sessions = Session::where('season_id', $seasonId)->get();

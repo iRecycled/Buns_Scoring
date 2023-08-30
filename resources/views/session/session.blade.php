@@ -22,11 +22,14 @@
                 <div class="flex flex-row items-center">
                     <div class="flex flex-1 items-center justify-center">
                         <h1 class="text-4xl font-bold text-center">{{ $league->name }}</h1>
+                        <p class=""> {{$sessions[0]->track_name}}
+                        </p>
+                        @php
+                        @endphp
                     </div>
                 </div>
             </div>
             <div class="p-4 text-center">
-                {{-- <select name="simsession_name" class="form-control" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);"> --}}
                 <select name="simsession_name_selector">
                     @foreach ($types as $session_type)
                         <option value="{{ $session_type }}">{{ $session_type }}</option>
@@ -54,9 +57,43 @@
 
                             var display_name = document.createElement("td");
                             display_name.innerHTML = element.display_name;
+
+                            var laps_lead = document.createElement("td");
+                            laps_lead.innerHTML = element.laps_lead;
+
+                            var laps_completed = document.createElement("td");
+                            laps_completed.innerHTML = element.laps_completed;
+
+                            var interval = document.createElement("td");
+                            interval.innerHTML = element.interval;
+
+                            var average_lap_time = document.createElement("td");
+                            average_lap_time.innerHTML = element.average_lap_time;
+
+                            var best_lap_time = document.createElement("td");
+                            best_lap_time.innerHTML = element.best_lap_time;
+
+                            var incidents = document.createElement("td");
+                            incidents.innerHTML = element.incidents;
+
+                            var starting_pos = document.createElement("td");
+                            starting_pos.innerHTML = element.starting_pos;
+
+                            var club_name = document.createElement("td");
+                            club_name.innerHTML = element.club_name;
+
                             row.appendChild(finish_position);
+                            row.appendChild(starting_pos);
                             row.appendChild(race_points);
                             row.appendChild(display_name);
+                            row.appendChild(laps_lead);
+                            row.appendChild(laps_completed);
+                            row.appendChild(interval);
+                            row.appendChild(average_lap_time);
+                            row.appendChild(best_lap_time);
+                            row.appendChild(incidents);
+                            row.appendChild(club_name);
+
                             table.appendChild(row);
                         });
                     }
@@ -72,25 +109,42 @@
                     });
             </script>
 
-            <div class="p-5 flex justify-center items-center">
-                    <div class="bg-gray-300 py-4 px-8 rounded-3xl">
-                        <div class="flex flex-row p-4 rounded-xl justify-center items-center">
+            <div class="flex justify-center items-center">
+                    <div class="bg-gray-300 py-4 px-12 rounded-3xl">
+                        <div class="flex flex-row p-2 rounded-xl justify-center items-center">
                                 <tr class="m-2">
                                   <table class="pl-2 text-center" id="racers_table">
                                     <thead>
                                       <tr>
                                         <th class="px-4">Pos</th>
+                                        <th class="p-2">Starting Pos.</th>
                                         <th class="px-6">Race Points</th>
                                         <th class="px-10">Driver</th>
+                                        <th class="px-5">Laps Lead</th>
+                                        <th>Laps Completed</th>
+                                        <th>Interval</th>
+                                        <th class="px-6">Avg. Lap Time</th>
+                                        <th class="px-4">Best Lap Time</th>
+                                        <th class="p-2">Incidents</th>
+                                        <th class="p-2">Club Name</th>
+
                                       </tr>
                                     </thead>
                                     <tbody>
-                                        {{-- Javascript creates table here --}}
                                         @foreach ($sessions as $user)
                                         <tr>
                                           <td>{{ $user->finish_position }}</td>
+                                          <td>{{ $user->starting_pos }}</td>
                                           <td>{{ $user->race_points }}</td>
                                           <td>{{ $user->display_name }}</td>
+                                          <td>{{ $user->laps_lead }}</td>
+                                          <td>{{ $user->laps_completed }}</td>
+                                          <td>{{ $user->interval }}</td>
+                                          <td>{{ $user->average_lap_time }}</td>
+                                          <td>{{ $user->best_lap_time }}</td>
+                                          <td>{{ $user->incidents }}</td>
+                                          <td>{{ $user->club_name }}</td>
+
                                         </tr>
                                       @endforeach
                                     </tbody>
@@ -101,7 +155,7 @@
                     </div>
             </div>
             <div>
-                <img class="rounded-3xl" src="{{ asset('f3.png') }}">
+                <img class="rounded-3xl py-5" src="{{ asset('f3.png') }}">
             </div>
         </div>
             <div class="flex-2 w-64">
