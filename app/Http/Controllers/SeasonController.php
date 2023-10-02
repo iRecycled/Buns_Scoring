@@ -168,7 +168,7 @@ class SeasonController extends Controller
                         'best_lap_number' => $realResults->best_lap_num,
                         'qualifying_lap_time' => $this->convertTime($realResults->best_qual_lap_time),
                         'starting_pos' => ++$realResults->starting_position,
-                        'interval' => $this->convertTime($realResults->interval, 10),
+                        'interval' => $this->convertTime($realResults->interval),
                         'incidents' => $realResults->incidents,
                         'club_name' => $realResults->club_name
                     ];
@@ -193,7 +193,7 @@ class SeasonController extends Controller
       }
 
       private function convertTime($time){
-        if($time <= 0) return null;
+        if($time <= 0) return "-";
         $minutes = floor((int) substr($time, 0, -4) / 60);
         $seconds = (int) substr( $time, 0 , -4) % 60;
         $milliseconds = (int) substr($time, -4, 3);
@@ -203,17 +203,14 @@ class SeasonController extends Controller
         return sprintf('%d:%02d.%03d', $minutes, $seconds, $milliseconds);
       }
 
-      //TODO getting leader lap count is hard
       private function calcInterval($simsession_name, $subsession_id, $leadersLapsComplete){
       $sessions = Session::where('simsession_name', $simsession_name)->where('subsession_id', $subsession_id)->get(['id','finish_position', 'interval', 'laps_completed']);
         foreach ($sessions as $race) {
-            if($race->interval == null && $race->finish_position !== 1){
+            if($race->interval == '-' && $race->finish_position !== 1){
                 $lapsBehind = $leadersLapsComplete - $race->laps_completed;
                 $race->interval = "-" . abs($lapsBehind) . " laps";
             }
-            else {
-                $race->interval = "-" . $race->interval;
-            }
+
             Session::where('id', $race->id)->update(['interval' => $race->interval]);
         }
       }
