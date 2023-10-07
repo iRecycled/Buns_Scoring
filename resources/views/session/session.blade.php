@@ -19,23 +19,33 @@
                 <a href="/season/{{$season_id}}" class="text-blue-500 underline p-2"> Season </a>
             </div>
             <div class="p-4 bg-white rounded-xl items-center justify-content-between">
-                <a class="add-penalties text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Add Penalties</a>
+
                 <div class="flex flex-row items-center">
-                    <div class="flex flex-1 items-center justify-center">
-                        <h1 class="text-4xl font-bold text-center">{{ $league->name }}</h1>
-                        <p class=""> {{$sessions[0]->track_name}}
-                        </p>
-                        @php
-                        @endphp
+
+                    <div class="flex flex-1 items-center justify-center flex-col text-center">
+                            <h1 class="text-4xl font-bold">{{ $league->name }}</h1>
+                            <p class="text-center pt-2">{{ $sessions[0]->track_name }} @if ($sessions[0]->config_name) - {{ $sessions[0]->config_name }} @endif</p>
+                            <p class="text-center pt-2"> Temp: {{$sessions[0]->temp_value}}
+                                @if ($sessions[0]->temp_units == 0)
+                                    F
+                                @if ($sessions[0]->temp_units == 1)
+                                    C
+                                @endif
+                                @endif
+                            <p class="text-center pt-2"> Humidity: {{ $sessions[0]->rel_humidity }}
+
                     </div>
+
                 </div>
             </div>
-            <div class="p-4 text-center">
-                <select name="simsession_name_selector">
-                    @foreach ($types as $session_type)
-                        <option value="{{ $session_type }}">{{ $session_type }}</option>
-                    @endforeach
-                </select>
+            <div class="py-4 text-center flex justify-between items-center">
+                <div class="flex-1">
+                    <select class="race-type-dropdown" name="simsession_name_selector">
+                    </select>
+                </div>
+                <div class="absolute">
+                    <a class=" add-penalties text-lg p-2 bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Add Penalties</a>
+                </div>
             </div>
 
             <div class="flex justify-center items-center">
@@ -51,14 +61,16 @@
                                     <th class="px-5">Laps Lead</th>
                                     <th>Laps Completed</th>
                                     <th class="px-4">Interval</th>
-                                    <th class="px-6">Avg. Lap Time</th>
                                     <th class="px-4">Best Lap Time</th>
                                     <th class="p-2">Incidents</th>
                                     <th class="p-2">Club Name</th>
+                                    <th class="p-2">Pen. Points</th>
+                                    <th class="p-2">Time Pen.</th>
+
                                     </tr>
                                 </thead>
                                 <tbody class="display">
-                                    @foreach ($sessions as $user)
+                                    @foreach ($calculatedResults as $user)
                                     <tr>
                                         <td>{{ $user->finish_position }}</td>
                                         <td>{{ $user->starting_pos }}</td>
@@ -67,10 +79,15 @@
                                         <td>{{ $user->laps_lead }}</td>
                                         <td>{{ $user->laps_completed }}</td>
                                         <td>{{ $user->interval }}</td>
-                                        <td>{{ $user->average_lap_time }}</td>
                                         <td>{{ $user->best_lap_time }}</td>
                                         <td>{{ $user->incidents }}</td>
                                         <td>{{ $user->club_name }}</td>
+                                        <td>{{ $user->penalty_points }}</td>
+                                    @if ($user->penalty_seconds)
+                                        <td>{{ $user->penalty_seconds }}</td>
+                                    @else
+                                        <td>-</td>
+                                    @endif
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -95,29 +112,42 @@
                 </div>
                 <div class="pb-6 flex justify-between items-center">
                     <div class="flex-grow text-center">
-                        <a id="addRowButton" class="p-2 bg-blue-400 hover:bg-blue-500 rounded-xl">Add Driver</a>
+                        <a id="addDriverButton" class="p-2 bg-blue-400 hover:bg-blue-500 rounded-xl">Add Driver</a>
                     </div>
                 </div>
                 <form id="driverForm" method="POST">
                     @csrf
                     <div class="modal-body">
                         <ul id="driverList" name="penalty-data">
-                            <li id="defaultElement">
-                                <select name="driver[]">
-                                    <option value="">Select a driver</option>
-                                @foreach ($drivers as $session_drivers)
-                                    <option value="{{ $session_drivers }}">{{ $session_drivers }}</option>
+                            @if ($currentData)
+                                @foreach ($currentData as $pen)
+                                <li data-index="{{ $loop->index }}">
+                                    <select name="driver[]" class="driver-dropdown">
+                                        <option value="{{$pen->display_name}}" selected>{{$pen->display_name}}
+                                    </select>
+                                    <input name="penaltyPoints[]" type="number" class="penaltyPoints" placeholder="Penalty Points" value="{{$pen->penalty_points}}">
+                                    <input name="penaltyTime[]" type="number" class="penaltyTime" placeholder="Penalty Time (seconds)"
+                                    value="{{$pen->penalty_seconds}}">
+                                    <select name="penalty-session[]">
+                                        @foreach ($types as $type)
+                                            <option {{$type==$pen->simsession_name ? 'selected' : ''}} value="{{$type}}">{{$type}}</option>
+                                        @endforeach
+                                    </select>
+                                    <a type="button" class="removeRowButton p-2 rounded text-center bg-red-500 hover:bg-red-600">X</a>
+                                </li>
                                 @endforeach
-                            </select>
-                                <input name="penaltyPoints[]" type="number" class="penaltyPoints" placeholder="Penalty Points">
-                                <input name="penaltyTime[]" type="number" class="penaltyTime" placeholder="Penalty Time (seconds)">
-                                <select name="penalty-session[]">
-                                    @foreach ($types as $session_type)
-                                        <option value="{{ $session_type }}">{{ $session_type }}</option>
-                                    @endforeach
+                            @else
+                                <li id="defaultElement">
+                                    <select name="driver[]" class="driver-dropdown">
+                                        <option value="" disabled>Select a driver</option>
+                                    </select>
+                                    <input name="penaltyPoints[]" type="number" class="penaltyPoints" placeholder="Penalty Points">
+                                    <input name="penaltyTime[]" type="number" class="penaltyTime" placeholder="Penalty Time (seconds)">
+                                    <select name="penalty-session[]" class="race-type-dropdown"></select>
                                 </select>
-                                <a type="button" class="removeRowButton p-2 rounded text-center bg-red-500 hover:bg-red-600" hidden>X</a>
-                            </li>
+                                    <a type="button" class="removeRowButton p-2 rounded text-center bg-red-500 hover:bg-red-600" hidden>X</a>
+                                </li>
+                            @endif
                         </ul>
                     </div>
                     <div class="modal-footer flex justify-center items-center">
@@ -134,9 +164,25 @@
 </html>
 
 <script>
-    var sessions1 = <?php echo json_encode($sessions); ?>;
+    function populateDropdownOptions(array, selector) {
+        let elements = document.querySelectorAll(selector);
+        elements.forEach(function (dropdown) {
+            array.forEach(function (opt) {
+                let e = document.createElement("option");
+                e.value = opt;
+                e.text = opt;
+                dropdown.appendChild(e);
+            });
+        });
+    }
+
+    let raceTypeArray = @json($types);
+    populateDropdownOptions(raceTypeArray, '.race-type-dropdown');
+
+    let driversArray = @json($drivers);
+
+    var sessions1 = <?php echo json_encode($calculatedResults); ?>;
     var selected = document.querySelector("select[name='simsession_name_selector']");
-    let penaltiesBtn = document.querySelector(".add-penalties");
 
     function createTable(selectedValue, type) {
         var sessionByName = sessions1.filter(element => {
@@ -155,10 +201,11 @@
                     "laps_lead",
                     "laps_completed",
                     "interval",
-                    "average_lap_time",
                     "best_lap_time",
                     "incidents",
                     "club_name",
+                    "penalty_points",
+                    "penalty_seconds"
                 ];
                 if(type == "display"){
                     fields.forEach(function(fieldName) {
@@ -171,49 +218,58 @@
             }
         });
     }
-    selected.addEventListener("change", function() {
+
+    function handleSelectedValueChange() {
         var selectedValue = selected.value;
         createTable(selectedValue, "display");
-    });
+    }
+    selected.addEventListener("change", handleSelectedValueChange);
 
-    window.addEventListener("load", function() {
-        var selectedValue = selected.value;
-        createTable(selectedValue, "display");
-
-    });
     const penModal = document.querySelector(".penalty-modal");
+    function togglePenaltyModal() {
+        penModal.classList.toggle('hidden');
+    }
+
+    let penaltiesBtn = document.querySelector(".add-penalties");
+    penaltiesBtn.addEventListener('click', togglePenaltyModal);
     const cancelPenBtn = document.querySelector(".cancel-penalties");
+    cancelPenBtn.addEventListener('click', togglePenaltyModal);
 
-    penaltiesBtn.addEventListener('click', () => {
-        penModal.classList.remove('hidden');
-    });
+    window.addEventListener("load", handleSelectedValueChange);
 
-    cancelPenBtn.addEventListener('click', () => {
-        penModal.classList.add('hidden');
-    });
+    populateDropdownOptions(driversArray, '.driver-dropdown');
 
-
-    document.getElementById('addRowButton').addEventListener('click', function () {
+    document.getElementById('addDriverButton').addEventListener('click', function () {
         const driverList = document.getElementById('driverList');
-        const newRow = driverList.querySelector('li').cloneNode(true);
+        let driverDropdown = document.querySelector('.driver-dropdown');
+        let raceTypeDropdown = document.querySelector('.race-type-dropdown');
 
-        newRow.querySelector('select').value = "";
-        newRow.querySelectorAll('input').forEach(function(input) {
-            input.value = "";
-        });
+        if(!driverDropdown){
+            driverDropdown = document.createElement('select');
+            driverDropdown.name = 'driver[]';
+            driverDropdown.className = 'driver-dropdown-add';
+        } else {
+            driverDropdown = driverDropdown.cloneNode(true);
+        }
+        if(!raceTypeDropdown) {
+            raceTypeDropdown = document.createElement('select');
+            raceTypeDropdown.name = 'penalty-session[]';
+            raceTypeDropdown.className = 'race-type-dropdown';
+        } else {
+            raceTypeDropdown = raceTypeDropdown.cloneNode(true);
+        }
+        const penaltyPointsInput = `<input name="penaltyPoints[]" type="number" class="penaltyPoints" placeholder="Penalty Points"></input>`;
+        const penaltyTimeInput = `<input name="penaltyTime[]" type="number" class="penaltyTime" placeholder="Penalty Time (seconds)"></input>`;
+        const removeButton = `<a type="button" class="removeRowButton p-2 rounded text-center bg-red-500 hover:bg-red-600">X</a>`;
 
+        const newRow = document.createElement('li');
+        newRow.innerHTML = driverDropdown.outerHTML + ' ' +
+        penaltyPointsInput + ' ' +
+        penaltyTimeInput + ' ' +
+        raceTypeDropdown.outerHTML + ' ' +
+        removeButton;
         driverList.appendChild(newRow);
-
-        if (driverList.children.length > 1) {
-            newRow.querySelector('.removeRowButton').style.display = 'inline-block';
-        }
-    });
-
-    window.addEventListener('DOMContentLoaded', function () {
-        const driverList = document.getElementById('driverList');
-        if (driverList.children.length === 1) {
-            driverList.querySelector('.removeRowButton').style.display = 'none';
-        }
+        populateDropdownOptions(driversArray, '.driver-dropdown-add');
     });
 
     document.getElementById('driverList').addEventListener('click', function (event) {
@@ -221,53 +277,6 @@
             const row = event.target.parentNode;
             const driverList = document.getElementById('driverList');
             row.remove();
-
-            if (driverList.children.length === 1) {
-                driverList.querySelector('.removeRowButton').style.display = 'none';
-            }
         }
     });
-
-    document.addEventListener("DOMContentLoaded", function () {
-    // Assuming you have already retrieved the form and driverList elements
-    const form = document.getElementById('driverForm');
-    const driverList = document.getElementById('driverList');
-
-    const sessionData = @json($currentData);
-    if(sessionData.length > 0){
-        document.getElementById('defaultElement').remove();
-    }
-    sessionData.forEach(function (record, index) {
-        const newRow = document.createElement('li');
-        newRow.innerHTML = `
-            <select name="driver[]">
-                <option value="">${record.display_name}</option>
-                @foreach ($drivers as $session_drivers)
-                    <option value="">{{ $session_drivers }}</option>
-                @endforeach
-            </select>
-            <input name="penaltyPoints[]" type="number" class="penaltyPoints" placeholder="Penalty Points" value="${record.penalty_points}">
-            <input name="penaltyTime[]" type="number" class="penaltyTime" placeholder="Penalty Time (seconds)" value="${record.penalty_seconds}">
-            <select name="penalty-session[]">
-                <option value="">${record.simsession_name}</option>
-                @foreach ($types as $session_type)
-                    <option value="{{ $session_type }}">{{ $session_type }}</option>
-                @endforeach
-            </select>
-            <a type="button" class="removeRowButton p-2 rounded text-center bg-red-500 hover:bg-red-600">X</a>`;
-
-        // Append the new list item to the driverList
-        driverList.appendChild(newRow);
-
-        if (index === 0) {
-            const defaultFormFields = form.querySelectorAll('input[name="penaltyPoints[]"], input[name="penaltyTime[]"]');
-            defaultFormFields.forEach(function (field) {
-                field.value = record.penalty_points; // Set the default value
-            });
-        }
-        });
-    });
-
-
-    //sessionData[0].display_name;
 </script>

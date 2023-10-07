@@ -78,7 +78,7 @@
                                 <thead>
                                   <tr>
                                     <th class="border-b border-black pr-2 pl-2">Session Name</th>
-                                    <th class="border-b border-l pr-2 pl-2 border-black">Session ID</th>
+                                    <th class="border-b border-l pr-2 pl-2 border-black">Track</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -86,7 +86,7 @@
                                     <tr>
                                         <td class="pr-1 pl-2">Session 1</td>
                                         <td class="border-l border-black">
-                                            <a href="/session/{{ $sessions->subsession_id }}" class="text-blue-500 underline p-2"> {{  $sessions->subsession_id }} </a>
+                                            <a href="/session/{{ $sessions->subsession_id }}" class="text-blue-500 underline p-2"> {{  $sessions->track_name }} </a>
                                         </td>
                                       </tr>
                                     @endforeach

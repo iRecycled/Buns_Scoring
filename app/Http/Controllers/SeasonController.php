@@ -81,7 +81,6 @@ class SeasonController extends Controller
             DB::rollBack();
             return redirect()->back()->withErrors(['message' => $e->getMessage()]);
         }
-
     }
 
     public function editScoring($seasonId){
