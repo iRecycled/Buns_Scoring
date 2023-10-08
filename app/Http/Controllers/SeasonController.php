@@ -22,21 +22,23 @@ class SeasonController extends Controller
         $season->season_count = $request->season_count;
 
         $inputFields = [
-            'qualifying_data' => 'qualifying',
-            'heat_data' => 'heat',
-            'consolation_data' => 'consolation',
-            'feature_data' => 'feature',
+            'qualifying_data' => 'QUALIFY',
+            'heat_data' => 'HEAT',
+            'consolation_data' => 'CONSOLATION',
+            'feature_data' => 'FEATURE',
+            'fastest_lap' => 'FASTEST',
+            'pole_position' => 'POLE'
         ];
         try {
             $season->save();
-            foreach ($inputFields as $inputField => $propertyName) {
-                $jsonData = json_encode($request->input($inputField));
+            foreach ($inputFields as $key => $propertyName) {
+                $jsonData = json_encode($request->input($key));
 
                 $scoring = new Scoring();
                 $scoring->league_id = $request->leagueId;
                 $scoring->scoring_json = $jsonData;
                 $scoring->season_id = $season->id;
-                $scoring->race_type = $propertyName;
+                $scoring->race_type = $key;
                 $scoring->save();
             }
 
@@ -59,10 +61,12 @@ class SeasonController extends Controller
             $leagueId = Scoring::where('season_id', $seasonId)->value('league_id');
             Scoring::where('season_id', $seasonId)->delete();
             $inputFields = [
-                'qualifying_data' => 'qualifying',
-                'heat_data' => 'heat',
-                'consolation_data' => 'consolation',
-                'feature_data' => 'feature',
+                'qualifying_data' => 'QUALIFY',
+                'heat_data' => 'HEAT',
+                'consolation_data' => 'CONSOLATION',
+                'feature_data' => 'FEATURE',
+                'fastest_lap' => 'FASTEST',
+                'pole_position' => 'POLE'
             ];
                 foreach ($inputFields as $inputField => $propertyName) {
                     $jsonData = json_encode($request->input($inputField));
@@ -99,15 +103,19 @@ class SeasonController extends Controller
 
         $season = Season::where('id',$seasonId)->distinct()->get();
         $league = $season->first()->league;
-        $qualifyingDb = Scoring::where('season_id',$seasonId)->where('race_type','qualifying')->pluck('scoring_json');
+        $qualifyingDb = Scoring::where('season_id',$seasonId)->where('race_type','QUALIFY')->pluck('scoring_json');
         $qualifying = processType($qualifyingDb);
-        $heatDb = Scoring::where('season_id',$seasonId)->where('race_type','heat')->pluck('scoring_json');
+        $heatDb = Scoring::where('season_id',$seasonId)->where('race_type','HEAT')->pluck('scoring_json');
         $heat = processType($heatDb);
-        $consolationDb = Scoring::where('season_id',$seasonId)->where('race_type','consolation')->pluck('scoring_json');
+        $consolationDb = Scoring::where('season_id',$seasonId)->where('race_type','CONSOLATION')->pluck('scoring_json');
         $consolation = processType($consolationDb);
-        $featureDb = Scoring::where('season_id',$seasonId)->where('race_type','feature')->pluck('scoring_json');
+        $featureDb = Scoring::where('season_id',$seasonId)->where('race_type','FEATURE')->pluck('scoring_json');
         $feature = processType($featureDb);
-        return view('season.editScoring', compact('league', 'season', 'qualifying', 'heat', 'consolation', 'feature'));
+        $poleDB = Scoring::where('season_id',$seasonId)->where('race_type','POLE')->pluck('scoring_json');
+        $pole = floatval(str_replace(',', '', preg_replace('/[^0-9,.]/', '', $poleDB[0])));
+        $fastest_lapDB = Scoring::where('season_id',$seasonId)->where('race_type','FASTEST')->pluck('scoring_json');
+        $fastest_lap = floatval(str_replace(',', '', preg_replace('/[^0-9,.]/', '', $fastest_lapDB[0])));
+        return view('season.editScoring', compact('league', 'season', 'qualifying', 'heat', 'consolation', 'feature','pole', 'fastest_lap'));
     }
 
     public function showSeason($seasonId){
@@ -222,16 +230,37 @@ class SeasonController extends Controller
         }
     }
 
-      private function updateRacePoints($seasonId){
-        $sessions = Session::where('season_id', $seasonId)->get();
+    private function updateRacePoints($seasonId, $results){
         $scoringQuery = Scoring::where('season_id', $seasonId)->get();
         $qualy_json = json_decode($scoringQuery[0]->scoring_json, true);
         $heat_json = json_decode($scoringQuery[1]->scoring_json, true);
         $consolation_json = json_decode($scoringQuery[2]->scoring_json, true);
         $feature_json = json_decode($scoringQuery[3]->scoring_json, true);
+        $fastest_lap_points = str_replace('"', '', $scoringQuery[4]->scoring_json);
+        $pole_points = str_replace('"', '', $scoringQuery[5]->scoring_json);
+        $fastestDrivers = [];
+        $lowestFastestLapTime = null;
+        $polePositionDrivers = [];
         $validSessionPattern = '/^(QUALIFY|CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
-        foreach($sessions as $racer){
+        $validSessionPatternWithoutQualy = '/^(CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
+        foreach($results as $racer){
             if(preg_match($validSessionPattern, $racer->simsession_name)){
+                if (preg_match($validSessionPatternWithoutQualy, $racer->simsession_name)) {
+                    if($racer->best_lap_time !== '-'){
+                        list($minutes, $seconds) = explode(':', $racer->best_lap_time);
+                        list($wholeSeconds, $milliseconds) = explode('.', $seconds);
+                        $totalSeconds = $minutes * 60 + $wholeSeconds + ($milliseconds / 1000);
+                        $sessionType = $racer->simsession_name;
+                        if (!isset($lowestFastestLapTime[$sessionType]) || $totalSeconds < $lowestFastestLapTime[$sessionType]) {
+                            $lowestFastestLapTime[$sessionType] = $totalSeconds;
+                            $fastestDrivers[$sessionType] = $racer;
+                        }
+                        if ($racer->finish_position == 1){
+                            $polePositionDrivers[$sessionType] = $racer;
+                        }
+                    }
+
+                }
                 switch ($racer->simsession_name) {
                     case 'QUALIFY':
                         $racer->race_points = $qualy_json[$racer->finish_position];
@@ -252,5 +281,16 @@ class SeasonController extends Controller
                   Session::where('id', $racer->id)->update(['race_points' => $racer->race_points]);
             }
         }
+        $driverIdsPole = array_column($polePositionDrivers, 'id');
+        $driverIdsFastest = array_column($fastestDrivers, 'id');
+        Session::whereIn('id', $driverIdsPole)
+        ->update([
+            'race_points' => DB::raw('race_points + ' . $pole_points)
+        ]);
+
+        Session::whereIn('id', $driverIdsFastest)
+            ->update([
+                'race_points' => DB::raw('race_points + ' . $fastest_lap_points)
+            ]);
     }
 }

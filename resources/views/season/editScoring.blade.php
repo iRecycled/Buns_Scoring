@@ -70,6 +70,9 @@
                                 <li class="mr-2">
                                     <button type="button" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="tabs" id="feature">Feature (Main)</button>
                                 </li>
+                                <li class="mr-2">
+                                    <button type="button" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="tabs" id="extra">Extra Points</button>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -107,6 +110,23 @@
                                 </div>
                             @endfor
                         </div>
+                        <div class="hidden" id="extraBody">
+                            <p class="pl-2 italic underline"> Extra points will apply to all race types except for Qualifying </p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="flex items-center p-2">
+                                    <label for="fastest_lap">Fastest Lap</label>
+                                </div>
+                                <div class="p-2">
+                                    <input type="text" id="fastest_lap" name="fastest_lap" class="rounded-lg p-2 w-12" value={{ (int) $fastest_lap }}>
+                                </div>
+                                <div class="flex items-center p-2">
+                                    <label for="pole_position">Pole Position</label>
+                                </div>
+                                <div class="p-2">
+                                    <input type="text" id="pole_position" name="pole_position" class="rounded-lg p-2 w-12" value={{ $pole }}>
+                                </div>
+                            </div>
+                        </div>
                         <br>
                         <div class="flex justify-center items-center pt-4">
                             <button class="bg-blue-600 text-white py-2 px-4 rounded-xl hover:bg-blue-700 mb-10">Save</button>
@@ -143,7 +163,7 @@
             const heatBody = document.getElementById('heatBody');
             const consolationBody = document.getElementById('consolationBody');
             const featureBody = document.getElementById('featureBody');
-            const bodys = [qualifyingBody, heatBody, consolationBody, featureBody];
+            const bodys = [qualifyingBody, heatBody, consolationBody, featureBody, extraBody];
             bodys.forEach(bod => {
                 bod.classList.add('hidden');
             })
@@ -167,6 +187,10 @@
                 featureBody.className = "grid grid-cols-4 grid-flow-row gap-2";
                 const feature = document.getElementById('feature');
                 feature.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500";
+            } else if(tab === 'extra') {
+                extraBody.className = "";
+                const extra = document.getElementById('extra');
+                extra.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500";
             }
         });
     });

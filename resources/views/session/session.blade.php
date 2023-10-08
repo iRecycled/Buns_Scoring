@@ -54,19 +54,18 @@
                                 <table class="pl-2 text-center" id="racers_table">
                                 <thead>
                                     <tr>
-                                    <th class="px-4">Pos</th>
-                                    <th class="p-2">Starting Pos.</th>
-                                    <th class="px-6">Race Points</th>
-                                    <th class="px-10">Driver</th>
-                                    <th class="px-5">Laps Lead</th>
-                                    <th>Laps Completed</th>
-                                    <th class="px-4">Interval</th>
-                                    <th class="px-4">Best Lap Time</th>
-                                    <th class="p-2">Incidents</th>
-                                    <th class="p-2">Club Name</th>
-                                    <th class="p-2">Pen. Points</th>
-                                    <th class="p-2">Time Pen.</th>
-
+                                    <th class="p-0">Pos</th>
+                                    <th class="p-3">Starting Pos.</th>
+                                    <th class="p-0">Race Points</th>
+                                    <th class="p-0">Driver</th>
+                                    <th class="px-4">Laps Lead</th>
+                                    <th class="p-0">Laps Completed</th>
+                                    <th class="p-4">Interval</th>
+                                    <th class="p-3">Best Lap Time</th>
+                                    <th class="p-0">Inc</th>
+                                    <th class="p-0">Club Name</th>
+                                    <th class="p-2">Pen Points</th>
+                                    <th class="p-2">Time Pen</th>
                                     </tr>
                                 </thead>
                                 <tbody class="display">
