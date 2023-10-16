@@ -77,14 +77,14 @@
                             <table class="table-auto border border-black">
                                 <thead>
                                   <tr>
-                                    <th class="border-b border-black pr-2 pl-2">Session Name</th>
+                                    <th class="border-b border-black pr-2 pl-2">Race #</th>
                                     <th class="border-b border-l pr-2 pl-2 border-black">Track</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($unique_leagues_sessions as $sessions)
                                     <tr>
-                                        <td class="pr-1 pl-2">Session 1</td>
+                                        <td class="pr-1 pl-2">Race {{ $loop->index+ 1 }} </td>
                                         <td class="border-l border-black">
                                             <a href="/session/{{ $sessions->subsession_id }}" class="text-blue-500 underline p-2"> {{  $sessions->track_name }} </a>
                                         </td>

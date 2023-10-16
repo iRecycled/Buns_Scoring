@@ -128,7 +128,7 @@ class SessionController extends Controller
                             $lowestFastestLapTime[$sessionType] = $totalSeconds;
                             $fastestDrivers[$sessionType] = $racer;
                         }
-                        if ($racer->finish_position == 1){
+                        if ($racer->starting_pos == 1){
                             $polePositionDrivers[$sessionType] = $racer;
                         }
                     }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile Form</title>
+  <title>Home</title>
   <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
   @php
   $leagues = DB::table('leagues')->get();
@@ -20,7 +20,7 @@
           <div class="flex-1 p-4 sm:w-64">
             <div class="flex flex-row p-4 bg-white rounded-xl justify-between items-center">
                 <h1 class="text-4xl mx-auto">Welcome to Buns Scoring!</h1>
-                <a href="league/create-league" class="p-2 rounded-xl bg-blue-200">Create a League</a>
+                <a href="league/create-league" class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Create a League</a>
             </div>
                 <div class="p-5 my-10 bg-red-200 rounded-3xl">
                     <h4 class="text-xl">Current Leagues: </h4>

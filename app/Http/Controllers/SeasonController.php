@@ -143,7 +143,7 @@ class SeasonController extends Controller
       return view ('season.standings.standings', compact('seasonId', 'standings', 'league'));
     }
 
-    public function newSessionSubmit(Request $request, $leagueId, $seasonId){
+    public function newSessionSubmit(Request $request, $leagueId, $seasonId) {
         info($request->file('json_file'));
         if($request->file('json_file')){
           $file = $request->file('json_file');
@@ -230,7 +230,8 @@ class SeasonController extends Controller
         }
     }
 
-    private function updateRacePoints($seasonId, $results){
+    private function updateRacePoints($seasonId){
+        $results = Session::where('season_id', $seasonId)->get();
         $scoringQuery = Scoring::where('season_id', $seasonId)->get();
         $qualy_json = json_decode($scoringQuery[0]->scoring_json, true);
         $heat_json = json_decode($scoringQuery[1]->scoring_json, true);

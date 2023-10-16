@@ -47,3 +47,7 @@ tbody tr:hover td a {
 .backdrop-filter-blur {
     backdrop-filter: blur(3px); /* Adjust the blur amount as needed */
   }
+
+.fastest-lap {
+    color: #E829F1;
+}

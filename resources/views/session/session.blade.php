@@ -54,9 +54,9 @@
                                 <table class="pl-2 text-center" id="racers_table">
                                 <thead>
                                     <tr>
-                                    <th class="p-0">Pos</th>
-                                    <th class="p-3">Starting Pos.</th>
-                                    <th class="p-0">Race Points</th>
+                                    <th class="pl-2">Finish</th>
+                                    <th class="p-0">Start</th>
+                                    <th class="pl-2">Race Points</th>
                                     <th class="p-0">Driver</th>
                                     <th class="px-4">Laps Lead</th>
                                     <th class="p-0">Laps Completed</th>
@@ -69,26 +69,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="display">
-                                    @foreach ($calculatedResults as $user)
-                                    <tr>
-                                        <td>{{ $user->finish_position }}</td>
-                                        <td>{{ $user->starting_pos }}</td>
-                                        <td>{{ $user->race_points }}</td>
-                                        <td>{{ $user->display_name }}</td>
-                                        <td>{{ $user->laps_lead }}</td>
-                                        <td>{{ $user->laps_completed }}</td>
-                                        <td>{{ $user->interval }}</td>
-                                        <td>{{ $user->best_lap_time }}</td>
-                                        <td>{{ $user->incidents }}</td>
-                                        <td>{{ $user->club_name }}</td>
-                                        <td>{{ $user->penalty_points }}</td>
-                                    @if ($user->penalty_seconds)
-                                        <td>{{ $user->penalty_seconds }}</td>
-                                    @else
-                                        <td>-</td>
-                                    @endif
-                                    </tr>
-                                    @endforeach
+                                    {{-- Display's the table --}}
                                 </tbody>
                             </table>
                     </div>
@@ -175,6 +156,11 @@
         });
     }
 
+    function timeToSeconds(timeString) {
+        const [minutes, seconds] = timeString.split(':');
+        return parseFloat(minutes) * 60 + parseFloat(seconds);
+    }
+
     let raceTypeArray = @json($types);
     populateDropdownOptions(raceTypeArray, '.race-type-dropdown');
 
@@ -186,6 +172,17 @@
     function createTable(selectedValue, type) {
         var sessionByName = sessions1.filter(element => {
             return(element.simsession_name == selectedValue);
+        });
+        let fastest = -1;
+        let fastest_time;
+        sessionByName.forEach(element => {
+            if (element.best_lap_time !== '-') {
+                let time = timeToSeconds(element.best_lap_time);
+                if (fastest === -1 || time < fastest) {
+                    fastest = time;
+                    fastest_time = element.best_lap_time;
+                }
+            }
         });
         var table = document.querySelector(".display");
         table.innerHTML = "";
@@ -209,6 +206,9 @@
                 if(type == "display"){
                     fields.forEach(function(fieldName) {
                     var cell = document.createElement("td");
+                    if(element[fieldName] == fastest_time) {
+                        cell.className = "fastest-lap";
+                    }
                     cell.textContent = element[fieldName];
                     row.appendChild(cell);
                     });
