@@ -120,7 +120,12 @@ class SessionController extends Controller
             if(preg_match($validSessionPattern, $racer->simsession_name)){
                 if (preg_match($validSessionPatternWithoutQualy, $racer->simsession_name)) {
                     if($racer->best_lap_time !== '-'){
-                        list($minutes, $seconds) = explode(':', $racer->best_lap_time);
+                        if(strpos($racer->best_lap_time, ':' !== false)) {
+                            list($minutes, $seconds) = explode(':', $racer->best_lap_time);
+                        } else {
+                            $minutes = 0;
+                            $seconds = $racer->best_lap_time;
+                        }
                         list($wholeSeconds, $milliseconds) = explode('.', $seconds);
                         $totalSeconds = $minutes * 60 + $wholeSeconds + ($milliseconds / 1000);
                         $sessionType = $racer->simsession_name;
@@ -156,10 +161,10 @@ class SessionController extends Controller
         }
         //for local db
         foreach($polePositionDrivers as $driver){
-            $driver->race_points += $pole_points;
+            $driver->race_points = (int)$driver->race_points + (int)$pole_points;
         }
         foreach($fastestDrivers as $driver){
-            $driver->race_points += $fastest_lap_points;
+            $driver->race_points = (int)$driver->race_points + (int)$fastest_lap_points;
         }
         $driverIdsPole = array_column($polePositionDrivers, 'id');
         $driverIdsFastest = array_column($fastestDrivers, 'id');
@@ -167,12 +172,12 @@ class SessionController extends Controller
         //updating the score on the real table
         Session::whereIn('id', $driverIdsPole)
         ->update([
-            'race_points' => DB::raw('race_points + ' . $pole_points)
+            'race_points' => DB::raw('race_points + ' . (int)$pole_points)
         ]);
 
         Session::whereIn('id', $driverIdsFastest)
             ->update([
-                'race_points' => DB::raw('race_points + ' . $fastest_lap_points)
+                'race_points' => DB::raw('race_points + ' . (int)$fastest_lap_points)
             ]);
     }
 

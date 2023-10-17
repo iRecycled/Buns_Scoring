@@ -50,14 +50,15 @@
                         </div>
                     <form method="POST" action="{{ route('createLeague') }}">
                             {{ csrf_field() }}
+                        <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
                         <p class="mt-5"><span class="text-red-600">* </span> League Name</p>
                         <input type="text" name="name" class="text-xl" required>
 
                         <p class="mt-5">League Description</p>
                         <textarea name="description" class="text-xl" rows="4" cols="50"></textarea>
 
-                        <p class="mt-5"><span class="text-red-600">* </span>iRacing League ID</p>
-                        <input type="text" name="leagueId" class="text-xl" required rows="4" cols="50"></textarea>
+                        {{-- <p class="mt-5"><span class="text-red-600">* </span>iRacing League ID</p>
+                        <input type="text" name="leagueId" class="text-xl" required rows="4" cols="50"></textarea> --}}
 
                         {{-- <p class="mt-5"><span class="text-red-600">* </span>iRacing Email</p>
                         <input type="email" name="email" class="text-xl" required rows="4" cols="50"></textarea>

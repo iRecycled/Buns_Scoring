@@ -19,8 +19,8 @@ class LeagueController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:leagues',
-            'description',
-            'leagueId' => 'required|unique:leagues',
+            'description'
+            // 'leagueId' => 'required|unique:leagues',
         ]);
 
         $league = new League();
@@ -29,13 +29,12 @@ class LeagueController extends Controller
         if($request->description){
           $league->description = $request->description;
         }
-        $league->leagueId = $request->leagueId;
+        $league->league_owner_id = $request->user_id;
 
         try {
-            //TODO figure out how to test auth without cookies
             if($league->save())
             {
-              return redirect()->route('league.showLeague', ['leagueId' => $league->leagueId])->with('success', 'League created successfully');
+              return redirect()->route('league.showLeague', ['leagueId' => $league->id])->with('success', 'League created successfully');
             }
             else {
               return redirect()->route('create')->withErrors(['message' => 'League failed to create']);

@@ -112,9 +112,9 @@ class SeasonController extends Controller
         $featureDb = Scoring::where('season_id',$seasonId)->where('race_type','FEATURE')->pluck('scoring_json');
         $feature = processType($featureDb);
         $poleDB = Scoring::where('season_id',$seasonId)->where('race_type','POLE')->pluck('scoring_json');
-        $pole = floatval(str_replace(',', '', preg_replace('/[^0-9,.]/', '', $poleDB[0])));
+        $pole = isset($poleDB[0]) ? floatval(str_replace(',', '', preg_replace('/[^0-9,.]/', '', $poleDB[0]))) : 0;
         $fastest_lapDB = Scoring::where('season_id',$seasonId)->where('race_type','FASTEST')->pluck('scoring_json');
-        $fastest_lap = floatval(str_replace(',', '', preg_replace('/[^0-9,.]/', '', $fastest_lapDB[0])));
+        $fastest_lap = isset($fastest_lapDB[0]) ? floatval(str_replace(',', '', preg_replace('/[^0-9,.]/', '', $fastest_lapDB[0]))) : 0;
         return view('season.editScoring', compact('league', 'season', 'qualifying', 'heat', 'consolation', 'feature','pole', 'fastest_lap'));
     }
 
@@ -248,7 +248,12 @@ class SeasonController extends Controller
             if(preg_match($validSessionPattern, $racer->simsession_name)){
                 if (preg_match($validSessionPatternWithoutQualy, $racer->simsession_name)) {
                     if($racer->best_lap_time !== '-'){
-                        list($minutes, $seconds) = explode(':', $racer->best_lap_time);
+                        if(strpos($racer->best_lap_time, ':' !== false)) {
+                            list($minutes, $seconds) = explode(':', $racer->best_lap_time);
+                        } else {
+                            $minutes = 0;
+                            $seconds = $racer->best_lap_time;
+                        }
                         list($wholeSeconds, $milliseconds) = explode('.', $seconds);
                         $totalSeconds = $minutes * 60 + $wholeSeconds + ($milliseconds / 1000);
                         $sessionType = $racer->simsession_name;

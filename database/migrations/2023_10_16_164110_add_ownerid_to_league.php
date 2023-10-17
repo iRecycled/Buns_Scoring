@@ -13,14 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('leagues', function (Blueprint $table) {
-            $table->id("leagueId");
-            $table->string("name");
-            $table->text("description");
-            $table->timestamps();
-            // $table->string("email");
-            // $table->string("password");
-            // $table->string("leagueId");
+        Schema::table('leagues', function (Blueprint $table) {
+            $table->unsignedBigInteger('league_owner_id');
         });
     }
 
@@ -31,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('leagues');
+        Schema::table('leagues', function (Blueprint $table) {
+            $table->dropColumn('league_owner_id');
+        });
     }
 };

@@ -43,9 +43,12 @@
                     <select class="race-type-dropdown" name="simsession_name_selector">
                     </select>
                 </div>
-                <div class="absolute">
-                    <a class=" add-penalties text-lg p-2 bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Add Penalties</a>
-                </div>
+                @if (Auth::check() && Auth::id() === $league->league_owner_id)
+                    <div class="absolute">
+                        <a class=" add-penalties text-lg p-2 bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Add Penalties</a>
+                    </div>
+                @endif
+
             </div>
 
             <div class="flex justify-center items-center">

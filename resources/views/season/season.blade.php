@@ -42,20 +42,25 @@
             <div class="flex items-center">
                 <a href="/league/{{ $league->leagueId }}" class="text-blue-500 underline p-2"> League </a> >
             </div>
-            <div class="p-4 bg-white rounded-xl items-center justify-content-between">
-                <div class="flex flex-row items-center">
-                    <div class="flex flex-1 pl-32 items-center justify-center">
-                        <h1 class="text-4xl font-bold text-center">{{ $league->name }}</h1>
+            <div class="relative">
+                <div class="p-4 bg-white rounded-xl items-center justify-content-between">
+                    <div class="flex flex-row items-center">
+                        <div class="flex flex-1 justify-center">
+                            <h1 class="text-4xl font-bold text-center">{{ $league->name }}</h1>
+                        </div>
+                        @if (Auth::check() && Auth::id() === $league->league_owner_id)
+                            <div class="pr-6 absolute top-4 right-36">
+                                <a href="/season/{{$seasonId}}/scoring", class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Edit Scoring</a>
+                            </div>
+                            <div>
+                                <button href="" id="modal-button" class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100 absolute top-4 right-4">Import session</button>
+                            </div>
+                        @endif
                     </div>
-                    <div class="pr-6">
-                        <a href="/season/{{$seasonId}}/scoring", class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Edit Scoring</a>
-                    </div>
-                    <div>
-                        <button href="" id="modal-button" class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Import session</button>
-                    </div>
+                    <p class="text-lg my-5 mx-auto text-center">{{ $league->description }}</p>
                 </div>
-                <p class="text-lg my-5 mx-auto text-center">{{ $league->description }}</p>
             </div>
+
             <div class="p-5 my-10  flex justify-center items-center">
                 <!-- Modal container -->
                 <div id="modal" class="hidden fixed top-0 left-0 w-full h-full flex items-center justify-center">
