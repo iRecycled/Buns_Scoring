@@ -237,8 +237,8 @@ class SeasonController extends Controller
         $heat_json = json_decode($scoringQuery[1]->scoring_json, true);
         $consolation_json = json_decode($scoringQuery[2]->scoring_json, true);
         $feature_json = json_decode($scoringQuery[3]->scoring_json, true);
-        $fastest_lap_points = str_replace('"', '', $scoringQuery[4]->scoring_json);
-        $pole_points = str_replace('"', '', $scoringQuery[5]->scoring_json);
+        $fastest_lap_points = (int)str_replace('"', '', $scoringQuery[4]->scoring_json);
+        $pole_points = (int)str_replace('"', '', $scoringQuery[5]->scoring_json);
         $fastestDrivers = [];
         $lowestFastestLapTime = null;
         $polePositionDrivers = [];
@@ -248,7 +248,7 @@ class SeasonController extends Controller
             if(preg_match($validSessionPattern, $racer->simsession_name)){
                 if (preg_match($validSessionPatternWithoutQualy, $racer->simsession_name)) {
                     if($racer->best_lap_time !== '-'){
-                        if(strpos($racer->best_lap_time, ':' !== false)) {
+                        if(strpos($racer->best_lap_time, ':') !== false) {
                             list($minutes, $seconds) = explode(':', $racer->best_lap_time);
                         } else {
                             $minutes = 0;
@@ -298,5 +298,17 @@ class SeasonController extends Controller
             ->update([
                 'race_points' => DB::raw('race_points + ' . $fastest_lap_points)
             ]);
+    }
+
+    public function deleteSession(Request $req) {
+        $sessions = Session::where('subsession_id', $req->sessionId)->get();
+        $leagueId = $sessions[0]->league_id;
+        $league = League::where('leagueId', $leagueId)->first();
+        if($league->league_owner_id == $req->userId) {
+            $sessions->each->delete();
+        } else {
+            return redirect()->back()->withErrors(['message' => 'Season failed to delete']);
+        }
+        return redirect("/season/". $req->seasonId)->with('success', 'Season deleted successfully');
     }
 }

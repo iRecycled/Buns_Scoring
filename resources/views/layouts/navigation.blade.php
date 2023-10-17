@@ -5,13 +5,7 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="/home">
-                        <div class="">
-                            <a href="https://imgur.com/yUuwH2L">
-                                <a><img src="{{ asset('buns.png')}}" style="max-width: 200px; max-height: 200px;"/></a>
-                            </a>
-                        </div>
-                    </a>
+                    <a href="/home"><img src="{{ asset('buns.png')}}"  style="max-width: 200px; max-height: 200px;"/></a>
                 </div>
 
                 <!-- Navigation Links -->
@@ -39,8 +33,6 @@
                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                     </svg>
                                 </div>
-
-
                         </button>
                     </x-slot>
 
@@ -61,13 +53,17 @@
                         </form>
                     </x-slot>
                 </x-dropdown>
-                @else
-                    <x-nav-link href="/login">Login</x-nav-link>
-                    <x-nav-link href="/register" class="pl-6">Register</x-nav-link>
-                @endif
+                    @else
+                        <div class="space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                            <x-nav-link href="/login">
+                                Login
+                            </x-nav-link>
+                            <x-nav-link href="/register" class="ml-6">
+                                Register
+                            </x-nav-link>
+                        </div>
+                    @endif
             </div>
-
-
         </div>
     </div>
 </nav>

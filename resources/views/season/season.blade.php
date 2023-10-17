@@ -84,6 +84,9 @@
                                   <tr>
                                     <th class="border-b border-black pr-2 pl-2">Race #</th>
                                     <th class="border-b border-l pr-2 pl-2 border-black">Track</th>
+                                    @if (Auth::check() && Auth::id() === $league->league_owner_id)
+                                        <th class="border-b border-l"></th>
+                                    @endif
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -93,6 +96,18 @@
                                         <td class="border-l border-black">
                                             <a href="/session/{{ $sessions->subsession_id }}" class="text-blue-500 underline p-2"> {{  $sessions->track_name }} </a>
                                         </td>
+                                        @if (Auth::check() && Auth::id() === $league->league_owner_id)
+                                        <td>
+                                            <form method="POST" action="{{$sessions->season_id}}/delete/{{$sessions->subsession_id }}" enctype="multipart/form-data">
+                                                @csrf
+                                                <input class="hidden" name="userId" value="{{Auth::id()}}">
+                                                <input class="hidden" name="sessionId" value={{$sessions->subsession_id}}>
+                                                <input class="hidden" name="seasonId" value={{$sessions->season_id}}>
+                                                <button id="delete-button" class="text-red-500 px-2">Delete</button>
+                                            </form>
+                                        </td>
+                                        @endif
+
                                       </tr>
                                     @endforeach
                                 </tbody>
@@ -134,6 +149,11 @@
             modal.classList.add('hidden');
             modal.classList.remove('modal-open');
         }
+    });
+
+    document.getElementById('delete-button').addEventListener('submit', function (event) {
+        event.preventDefault();
+        this.submit();
     });
 
   </script>

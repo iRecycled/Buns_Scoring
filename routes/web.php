@@ -38,6 +38,7 @@ Route::post('/league/createLeague', '\App\Http\Controllers\LeagueController@crea
 Route::post('/league/{leagueId}/createSeason', '\App\Http\Controllers\SeasonController@createSeason')->name('createSeason');
 Route::post('/league/{leagueId}/{seasonId}', '\App\Http\Controllers\SeasonController@newSessionSubmit');
 Route::post('season/{id}/scoring', '\App\Http\Controllers\SeasonController@updateScoring');
+Route::post('/season/{id}/delete/{sessionId}', '\App\Http\Controllers\SeasonController@deleteSession');
 Route::post('/session/{sessionId}', '\App\Http\Controllers\SessionController@submitPenalties');
 
 Route::get('/league/create-league', function() {return view('league.create_league');})->name('create_league');

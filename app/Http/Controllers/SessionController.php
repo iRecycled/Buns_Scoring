@@ -120,7 +120,7 @@ class SessionController extends Controller
             if(preg_match($validSessionPattern, $racer->simsession_name)){
                 if (preg_match($validSessionPatternWithoutQualy, $racer->simsession_name)) {
                     if($racer->best_lap_time !== '-'){
-                        if(strpos($racer->best_lap_time, ':' !== false)) {
+                        if(strpos($racer->best_lap_time, ':') !== false) {
                             list($minutes, $seconds) = explode(':', $racer->best_lap_time);
                         } else {
                             $minutes = 0;
