@@ -34,7 +34,7 @@
                                     <button type="button" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="tabs" id="qualifying">Qualifying</button>
                                 </li>
                                 <li class="mr-2">
-                                    <button type="button" class="tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500" aria-current="page" data-tab="tabs" id="heats">Heats</button>
+                                    <button type="button" class="tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active" aria-current="page" data-tab="tabs" id="heats">Heats</button>
                                 </li>
                                 <li class="mr-2">
                                     <button type="button" class="text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700" data-tab="tabs" id="consolation">Consolation</button>
@@ -141,24 +141,24 @@
             if (tab === 'qualifying') {
                 qualifyingBody.className = "grid grid-cols-4 grid-flow-row gap-2";
                 const qualifying = document.getElementById('qualifying');
-                qualifying.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500";
+                qualifying.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";
             } else if (tab === 'heats') {
                 heatBody.className = "grid grid-cols-4 grid-flow-row gap-2";
                 const heat = document.getElementById('heats');
-                heat.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500";
+                heat.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";
             } else if (tab === 'consolation') {
                 consolationBody.className = "grid grid-cols-4 grid-flow-row gap-2";
                 consolationBody.style.display = 'visible';
                 const consolation = document.getElementById('consolation');
-                consolation.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500";
+                consolation.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";
             } else if (tab === 'feature') {
                 featureBody.className = "grid grid-cols-4 grid-flow-row gap-2";
                 const feature = document.getElementById('feature');
-                feature.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500";
+                feature.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";
             } else if(tab === 'extra') {
                 extraBody.className = "";
                 const extra = document.getElementById('extra');
-                extra.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500";
+                extra.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";
             }
         });
     });
