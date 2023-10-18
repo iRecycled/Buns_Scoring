@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Standings <title>
   <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <title>Season Standings</title>
 </head>
 
     <x-app-layout class="flex flex-col min-h-screen">
@@ -40,6 +40,12 @@
                                         <th class="px-4">Pos</th>
                                         <th class="px-6">Season Points</th>
                                         <th class="px-10">Driver</th>
+                                        <th class="px-10">Laps</th>
+                                        <th class="px-4">Laps lead</th>
+                                        <th class="px-4">Incidents</th>
+                                        <th class="px-2">Races</th>
+                                        <th class="px-4">Wins</th>
+
                                       </tr>
                                     </thead>
                                     <tbody>
@@ -49,6 +55,12 @@
                                             <td>{{ $index + 1 }}</td>
                                           <td>{{ $user->total_points }}</td>
                                           <td>{{ $user->display_name }}</td>
+                                          <td>{{ $user->total_laps }}</td>
+                                          <td>{{ $user->total_lead }}</td>
+                                          <td>{{ $user->total_incidents }}</td>
+                                          <td>{{ $user->total_races }}</td>
+                                          <td>{{ $user->total_wins }}</td>
+
                                         </tr>
                                       @endforeach
                                     </tbody>

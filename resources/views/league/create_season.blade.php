@@ -15,13 +15,17 @@
           <div class="flex-1 p-4 sm:w-64">
             <div class="p-5 my-10  flex justify-center items-center">
                 <div class="bg-gray-300 py-4 px-8 rounded-3xl">
-                        <div class="flex flex-row p-4 rounded-xl justify-center items-center">
-                            <h1 class="text-4xl mx-auto">Create a Season</h1>
+                        <div class="flex flex justify-center p-4">
+                            <h1 class="text-4xl">Create a Season</h1>
                         </div>
                     <form method="POST" action="{{route('createSeason', ['leagueId' => $league->first()->leagueId])}}">
                             {{ csrf_field() }}
-                        <p class="mt-5"><span class="text-red-600">* </span> Season Name</p>
-                        <input type="text" name="season_name" class="text-xl" required>
+                        <div class="flex flex justify-center">
+                            <p><span class="text-red-600">* </span> Season Name</p>
+                        </div>
+                        <div class="flex flex justify-center">
+                            <input type="text" name="season_name" class="text-xl" required>
+                        </div>
                         <input type="text" class="hidden" name="season_count" value="{{ ++$count }}">
                         <br>
                         <div class="flex flex-row p-4 rounded-xl justify-center items-center">
@@ -53,7 +57,7 @@
                         @for ($i = 1; $i <= 60; $i++)
                             <div class="grid grid-cols-4 items-center">
                                 <p class="rounded-lg w-14">#{{$i}}</p>
-                                <input type="text" name="qualifying_data[{{$i}}]" class="rounded-lg w-14" value="0"></input>
+                                <input type="text" name="qualifying_data[{{$i}}]" class="rounded-lg w-14" value="0">
                             </div>
                         @endfor
                     </div>
@@ -61,7 +65,7 @@
                         @for ($i = 1; $i <= 60; $i++)
                             <div class="grid grid-cols-4 items-center">
                                 <p class="rounded-lg w-14">#{{$i}}</p>
-                                <input type="text" name="heat_data[{{$i}}]" class="rounded-lg w-14" value="0"></input>
+                                <input type="text" name="heat_data[{{$i}}]" class="rounded-lg w-14" value="0">
                             </div>
                         @endfor
                     </div>
@@ -70,7 +74,7 @@
                             @for ($i = 1; $i <= 60; $i++)
                                 <div class="grid grid-cols-4 items-center">
                                     <p class="rounded-lg w-14">#{{$i}}</p>
-                                    <input type="text" name="consolation_data[{{$i}}]" class="rounded-lg w-14" value="0"></input>
+                                    <input type="text" name="consolation_data[{{$i}}]" class="rounded-lg w-14" value="0">
                                 </div>
                             @endfor
                         </div>
@@ -79,7 +83,7 @@
                         @for ($i = 1; $i <= 60; $i++)
                             <div class="grid grid-cols-4 items-center">
                                 <p class="rounded-lg w-14">#{{$i}}</p>
-                                <input type="text" name="feature_data[{{$i}}]" class="rounded-lg w-14" value="0"></input>
+                                <input type="text" name="feature_data[{{$i}}]" class="rounded-lg w-14" value="0">
                             </div>
                         @endfor
                     </div>

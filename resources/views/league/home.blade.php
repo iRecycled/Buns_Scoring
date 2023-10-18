@@ -41,22 +41,23 @@
         </div>
     @endif
         <div class="flex flex-row flex-1">
-          <main class="w-64 bg-white-100 flex-0 sm:flex-2">
-          </main>
-          <div class="flex-1 p-4 sm:w-64">
-            <div class="p-4 bg-white rounded-xl items-center justify-content-between">
-                <div class="flex flex-row items-center">
-                    <div class="flex flex-1 pl-32 items-center justify-center">
+          <main class="w-64 bg-white-100 flex-0 sm:flex-2"></main>
+          <div class="flex-1 p-4 sm:w-64" id="container">
+            <div class="relative">
+                <div class="p-4 bg-white rounded-xl items-center justify-content-between">
+                    <div class="flex flex-1 justify-center">
                         <h1 class="text-4xl font-bold text-center">{{ $league->name }}</h1>
                     </div>
+
                     @if(Auth::check() && Auth::id() === $league->league_owner_id)
-                        <div>
+                        <div class="pr-6 absolute top-4 right-2">
                             <a href="{{route('create_season', ['leagueId' => $league->leagueId])}}" id="modal-button" class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Create Season</a>
                         </div>
                     @endif
                 </div>
                 <p class="text-lg my-3 mx-auto text-center">{{ $league->description }}</p>
             </div>
+
             <div class="p-5 my-10  flex justify-center items-center">
                     <div class="bg-gray-300 py-4 px-8 rounded-3xl">
                         <div class="p-4 rounded-xl">

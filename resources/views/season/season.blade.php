@@ -21,20 +21,6 @@
             </div>
         </div>
     @endif
-
-        @if (session()->has('success'))
-        <div class="flex p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-            <span class="sr-only">Error</span>
-            <div>
-                <span class="font-medium">{{ session('success') }}</span>
-                <ul class="mt-1.5 ml-4 text-green-700 list-disc list-inside">
-                    @foreach ($errors->all() as $error)
-                        <li>{!! $error !!}</li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-    @endif
         <div class="flex flex-row flex-1">
           <main class="w-64 bg-white-100 flex-0 sm:flex-2">
           </main>
@@ -53,7 +39,8 @@
                                 <a href="/season/{{$seasonId}}/scoring", class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Edit Scoring</a>
                             </div>
                             <div>
-                                <button href="" id="modal-button" class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100 absolute top-4 right-4">Import session</button>
+                                <button href="" id="modal-button" class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100 absolute top-4 right-4">Import session
+                                </button>
                             </div>
                         @endif
                     </div>

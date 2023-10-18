@@ -135,8 +135,15 @@ class SeasonController extends Controller
       $seasons = Season::where('id',$seasonId)->distinct()->get();
       $league = $seasons->first()->league;
       $standings = DB::table('sessions')
-      ->select('display_name', DB::raw('SUM(race_points) as total_points'))
+      ->select('display_name',
+      DB::raw('SUM(race_points) as total_points'),
+      DB::raw('SUM(laps_completed) as total_laps'),
+      DB::raw('SUM(incidents) as total_incidents'),
+      DB::raw('COUNT(*) as total_races'),
+      DB::raw('SUM(laps_lead) as total_lead'),
+      DB::raw('SUM(CASE WHEN finish_position = 1 THEN 1 ELSE 0 END) as total_wins'))
       ->where('season_id', $seasonId)
+      ->where('simsession_name', '!=', 'QUALIFY')
       ->groupBy('display_name')
       ->orderByDesc('total_points')
       ->get();
