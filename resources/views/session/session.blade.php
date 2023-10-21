@@ -24,7 +24,16 @@
 
                     <div class="flex flex-1 items-center justify-center flex-col text-center">
                             <h1 class="text-4xl font-bold">{{ $league->name }}</h1>
-                            <p class="text-center pt-2">{{ $sessions[0]->track_name }} @if ($sessions[0]->config_name) - {{ $sessions[0]->config_name }} @endif</p>
+                            <p class="text-center pt-2">{{ $sessions[0]->track_name }}
+                                @if ($sessions[0]->config_name) - {{ $sessions[0]->config_name }}
+                                @endif
+                            </p>
+                            <p class="text-center pt-2">
+                                @php
+                                    $formattedDate = \Carbon\Carbon::parse($sessions[0]->race_date)->format('l, F jS, Y');
+                                @endphp
+                                {{ $formattedDate }}
+                            </p>
                             <p class="text-center pt-2"> Temp: {{$sessions[0]->temp_value}}
                                 @if ($sessions[0]->temp_units == 0)
                                     F

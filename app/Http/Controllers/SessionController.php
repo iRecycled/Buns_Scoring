@@ -159,21 +159,21 @@ class SessionController extends Controller
                   Session::where('id', $racer->id)->update(['race_points' => $racer->race_points]);
             }
         }
+        // foreach($polePositionDrivers as $driver){
+        //     $driver->race_points = (int)$driver->race_points + (int)$pole_points;
+        // }
         //for local db
-        foreach($polePositionDrivers as $driver){
-            $driver->race_points = (int)$driver->race_points + (int)$pole_points;
-        }
         foreach($fastestDrivers as $driver){
             $driver->race_points = (int)$driver->race_points + (int)$fastest_lap_points;
         }
-        $driverIdsPole = array_column($polePositionDrivers, 'id');
+        // $driverIdsPole = array_column($polePositionDrivers, 'id');
         $driverIdsFastest = array_column($fastestDrivers, 'id');
 
         //updating the score on the real table
-        Session::whereIn('id', $driverIdsPole)
-        ->update([
-            'race_points' => DB::raw('race_points + ' . (int)$pole_points)
-        ]);
+        // Session::whereIn('id', $driverIdsPole)
+        // ->update([
+        //     'race_points' => DB::raw('race_points + ' . (int)$pole_points)
+        // ]);
 
         Session::whereIn('id', $driverIdsFastest)
             ->update([
