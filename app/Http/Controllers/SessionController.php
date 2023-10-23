@@ -105,12 +105,12 @@ class SessionController extends Controller
 
     private function updateRacePoints($seasonId, $results){
         $scoringQuery = Scoring::where('season_id', $seasonId)->get();
-        $qualy_json = json_decode($scoringQuery[0]->scoring_json, true);
-        $heat_json = json_decode($scoringQuery[1]->scoring_json, true);
-        $consolation_json = json_decode($scoringQuery[2]->scoring_json, true);
-        $feature_json = json_decode($scoringQuery[3]->scoring_json, true);
-        $fastest_lap_points = str_replace('"', '', $scoringQuery[4]->scoring_json);
-        $pole_points = str_replace('"', '', $scoringQuery[5]->scoring_json);
+        $qualy_points = json_decode($scoringQuery[0]->qualifying, true);
+        $heat_points = json_decode($scoringQuery[0]->heat, true);
+        $consolation_points = json_decode($scoringQuery[0]->consolation, true);
+        $feature_points = json_decode($scoringQuery[0]->feature, true);
+        $fastest_lap_points = $scoringQuery[0]->fastest_lap;
+
         $fastestDrivers = [];
         $lowestFastestLapTime = null;
         $polePositionDrivers = [];
@@ -141,18 +141,18 @@ class SessionController extends Controller
                 }
                 switch ($racer->simsession_name) {
                     case 'QUALIFY':
-                        $racer->race_points = $qualy_json[$racer->finish_position];
+                        $racer->race_points = $qualy_points[$racer->finish_position];
                         break;
                     case 'CONSOLATION':
-                        $racer->race_points = $consolation_json[$racer->finish_position];
+                        $racer->race_points = $consolation_points[$racer->finish_position];
                         break;
                     case 'RACE':
                     case 'FEATURE':
-                        $racer->race_points = $feature_json[$racer->finish_position];
+                        $racer->race_points = $feature_points[$racer->finish_position];
                         break;
                     default:
                         if(strpos($racer->simsession_name, 'HEAT') !== false){
-                            $racer->race_points = $heat_json[$racer->finish_position];
+                            $racer->race_points = $heat_points[$racer->finish_position];
                         }
                         break;
                   }

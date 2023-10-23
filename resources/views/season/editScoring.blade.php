@@ -58,7 +58,7 @@
                             @for ($i = 1; $i <= 60; $i++)
                                 <div class="grid grid-cols-4 items-center">
                                     <p class="rounded-lg w-14">#{{$i}}</p>
-                                    <input type="text" name="heat_data[{{$i}}]" class="rounded-lg w-14" value={{ $heat[$i] }}></input>
+                                    <input type="text" name="heat_data[{{$i}}]" class="rounded-lg w-14" value="{{ $heat[$i] }}"></input>
                                 </div>
                             @endfor
                         </div>
@@ -67,7 +67,7 @@
                                 @for ($i = 1; $i <= 60; $i++)
                                     <div class="grid grid-cols-4 items-center">
                                         <p class="rounded-lg w-14">#{{$i}}</p>
-                                        <input type="text" name="consolation_data[{{$i}}]" class="rounded-lg w-14" value={{ $consolation[$i] }}></input>
+                                        <input type="text" name="consolation_data[{{$i}}]" class="rounded-lg w-14" value="{{ $consolation[$i] }}"></input>
                                     </div>
                                 @endfor
                             </div>
@@ -76,7 +76,7 @@
                             @for ($i = 1; $i <= 60; $i++)
                                 <div class="grid grid-cols-4 items-center">
                                     <p class="rounded-lg w-14">#{{$i}}</p>
-                                    <input type="text" name="feature_data[{{$i}}]" class="rounded-lg w-14" value={{ $feature[$i] }}></input>
+                                    <input type="text" name="feature_data[{{$i}}]" class="rounded-lg w-14" value="{{ $feature[$i] }}"></input>
                                 </div>
                             @endfor
                         </div>
@@ -87,7 +87,7 @@
                                     <label for="fastest_lap">Fastest Lap</label>
                                 </div>
                                 <div class="p-2">
-                                    <input type="text" id="fastest_lap" name="fastest_lap" class="rounded-lg p-2 w-10" value={{ (int) $fastest_lap }}>
+                                    <input type="text" id="fastest_lap" name="fastest_lap" class="rounded-lg p-2 w-10" value={{ $fastest_lap }}>
                                 </div>
                                 {{--
                                 <div class="flex items-center p-2">
