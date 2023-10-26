@@ -2,3 +2,8 @@
 deployment:
   tasks:
     - touch ../rayishandsome2
+    - source /home/flexgrip/nodevenv/buns-scoring.com/18/bin/activate && cd /home/flexgrip/buns-scoring.com
+    - composer install --no-interaction --no-dev
+    - php artisan migrate --force
+    - npm install
+    - npm run build
