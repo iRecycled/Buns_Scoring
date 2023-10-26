@@ -34,7 +34,7 @@
                         <div class="flex flex-1 justify-center">
                             <h1 class="text-4xl font-bold text-center">{{ $league->name }}</h1>
                         </div>
-                        @if (Auth::check() && Auth::id() === $league->league_owner_id)
+                        @if (Auth::check() && Auth::id() == $league->league_owner_id)
                             <div class="pr-6 absolute top-4 right-36">
                                 <a href="/season/{{$seasonId}}/scoring", class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Edit Scoring</a>
                             </div>
@@ -71,7 +71,7 @@
                                   <tr>
                                     <th class="border-b border-black pr-2 pl-2">Race #</th>
                                     <th class="border-b border-l pr-2 pl-2 border-black">Track</th>
-                                    @if (Auth::check() && Auth::id() === $league->league_owner_id)
+                                    @if (Auth::check() && Auth::id() == $league->league_owner_id)
                                         <th class="border-b border-l"></th>
                                     @endif
                                   </tr>
@@ -83,7 +83,7 @@
                                         <td class="border-l border-black">
                                             <a href="/session/{{ $sessions->subsession_id }}" class="text-blue-500 underline p-2"> {{  $sessions->track_name }} </a>
                                         </td>
-                                        @if (Auth::check() && Auth::id() === $league->league_owner_id)
+                                        @if (Auth::check() && Auth::id() == $league->league_owner_id)
                                         <td>
                                             <form method="POST" action="{{$sessions->season_id}}/delete/{{$sessions->subsession_id }}" enctype="multipart/form-data">
                                                 @csrf

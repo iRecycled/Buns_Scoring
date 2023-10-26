@@ -51,3 +51,12 @@ tbody tr:hover td a {
 .fastest-lap {
     color: #E829F1;
 }
+
+/* Show element */
+.showDropWeekOptions.visible {
+    visibility: visible;
+}
+
+.showDropWeekOptions {
+    visibility: hidden;
+}

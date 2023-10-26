@@ -18,7 +18,7 @@
 
           <div class="flex-1 p-4 sm:w-64">
             <div class="p-5 my-10  flex justify-center items-center">
-                <div class="bg-gray-300 py-4 px-8 rounded-3xl">
+                <div class="bg-gray-300 py-4 px-8 rounded-3xl" style="width: 800px">
                     <form method="POST" action={{ url("/season/" . $season[0]->id) . "/scoring" }} enctype="multipart/form-data">
                             {{ csrf_field() }}
                         <br>
@@ -58,7 +58,7 @@
                             @for ($i = 1; $i <= 60; $i++)
                                 <div class="grid grid-cols-4 items-center">
                                     <p class="rounded-lg w-14">#{{$i}}</p>
-                                    <input type="text" name="heat_data[{{$i}}]" class="rounded-lg w-14" value={{ $heat[$i] }}></input>
+                                    <input type="text" name="heat_data[{{$i}}]" class="rounded-lg w-14" value="{{ $heat[$i] }}"></input>
                                 </div>
                             @endfor
                         </div>
@@ -67,7 +67,7 @@
                                 @for ($i = 1; $i <= 60; $i++)
                                     <div class="grid grid-cols-4 items-center">
                                         <p class="rounded-lg w-14">#{{$i}}</p>
-                                        <input type="text" name="consolation_data[{{$i}}]" class="rounded-lg w-14" value={{ $consolation[$i] }}></input>
+                                        <input type="text" name="consolation_data[{{$i}}]" class="rounded-lg w-14" value="{{ $consolation[$i] }}"></input>
                                     </div>
                                 @endfor
                             </div>
@@ -76,7 +76,7 @@
                             @for ($i = 1; $i <= 60; $i++)
                                 <div class="grid grid-cols-4 items-center">
                                     <p class="rounded-lg w-14">#{{$i}}</p>
-                                    <input type="text" name="feature_data[{{$i}}]" class="rounded-lg w-14" value={{ $feature[$i] }}></input>
+                                    <input type="text" name="feature_data[{{$i}}]" class="rounded-lg w-14" value="{{ $feature[$i] }}"></input>
                                 </div>
                             @endfor
                         </div>
@@ -87,13 +87,33 @@
                                     <label for="fastest_lap">Fastest Lap</label>
                                 </div>
                                 <div class="p-2">
-                                    <input type="text" id="fastest_lap" name="fastest_lap" class="rounded-lg p-2 w-12" value={{ (int) $fastest_lap }}>
+                                    <input type="text" id="fastest_lap" name="fastest_lap" class="rounded-lg p-2 w-10" value={{ $fastest_lap }}>
                                 </div>
+                                {{--
                                 <div class="flex items-center p-2">
                                     <label for="pole_position">Pole Position</label>
                                 </div>
                                 <div class="p-2">
-                                    <input type="text" id="pole_position" name="pole_position" class="rounded-lg p-2 w-12" value={{ $pole }}>
+                                    <input type="text" id="pole_position" name="pole_position" class="rounded-lg p-2 w-10" value={{ $pole }}>
+                                </div>
+                                --}}
+                                <div class="flex items-center inline-flex">
+                                    <p class="p-2"> Drop weeks enabled: </p>
+                                    <input type="checkbox" name="enabled_drop_weeks" class="form-checkbox h-5 w-5 text-blue-600 ml-10 rounded-sm enabled_drop_weeks" value="true" {{ $drop_week_enabled ? 'checked' : ''}}>
+                                    {{-- loading is set in javascript --}}
+                                </div>
+                                <div class="flex"></div>
+                                <div class="flex items-center p-2">
+                                    <label class="showDropWeekOptions">Number of races before drop weeks start</label>
+                                </div>
+                                <div class="p-2">
+                                    <input type="text" name="start_of_drop_score" class="rounded-lg p-2 w-10 showDropWeekOptions" value={{ $drop_week_start }}>
+                                </div>
+                                <div class="flex items-center p-2">
+                                    <label class="showDropWeekOptions">Number of lowest score races to drop</label>
+                                </div>
+                                <div class="p-2">
+                                    <input type="text" name="races_to_drop" class="rounded-lg p-2 w-10 showDropWeekOptions" value="4">
                                 </div>
                             </div>
                         </div>
@@ -125,9 +145,7 @@
 
     listItems.forEach(item => {
         item.addEventListener('click', () => {
-            // Get the value of the 'data-tab' attribute
             const tab = item.getAttribute('id');
-            // Update the content based on the clicked tab
             const allTabs = document.querySelectorAll('[data-tab="tabs"]');
             const qualifyingBody = document.getElementById('qualifyingBody');
             const heatBody = document.getElementById('heatBody');
@@ -158,6 +176,30 @@
                 const feature = document.getElementById('feature');
                 feature.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";
             } else if(tab === 'extra') {
+                const allowDropWeeksCheckbox = document.querySelector('.enabled_drop_weeks');
+                const showDropWeekOptions = document.querySelectorAll('.showDropWeekOptions');
+
+                allowDropWeeksCheckbox.addEventListener('change', function () {
+                    showDropWeekOptions.forEach((element) => {
+                        if (!this.checked) {
+                            element.classList.remove('visible');
+                        } else {
+                            element.classList.add('visible');
+                        }
+                    })
+                });
+
+                const areDropWeeksEnabled = allowDropWeeksCheckbox.checked;
+                showDropWeekOptions.forEach((element) => {
+                        if (areDropWeeksEnabled) {
+                            allowDropWeeksCheckbox.checked = true;
+                            element.classList.add('visible');
+                        } else {
+                            allowDropWeeksCheckbox.checked = false;
+                            element.classList.remove('visible');
+                        }
+                    });
+
                 extraBody.className = "";
                 const extra = document.getElementById('extra');
                 extra.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";

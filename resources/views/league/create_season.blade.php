@@ -14,11 +14,11 @@
 
           <div class="flex-1 p-4 sm:w-64">
             <div class="p-5 my-10  flex justify-center items-center">
-                <div class="bg-gray-300 py-4 px-8 rounded-3xl">
+                <div class="bg-gray-300 py-4 px-8 rounded-3xl" style="width: 800px">
                         <div class="flex flex justify-center p-4">
                             <h1 class="text-4xl">Create a Season</h1>
                         </div>
-                    <form method="POST" action="{{route('createSeason', ['leagueId' => $league->first()->leagueId])}}">
+                    <form id="scoring_form" method="POST" action="{{route('createSeason', ['leagueId' => $league->first()->leagueId])}}">
                             {{ csrf_field() }}
                         <div class="flex flex justify-center">
                             <p><span class="text-red-600">* </span> Season Name</p>
@@ -52,7 +52,6 @@
                             </ul>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-4 grid-flow-row gap-2 hidden" id="qualifyingBody">
                         @for ($i = 1; $i <= 60; $i++)
                             <div class="grid grid-cols-4 items-center">
@@ -94,18 +93,41 @@
                                     <label for="fastest_lap">Fastest Lap</label>
                                 </div>
                                 <div class="p-2">
-                                    <input type="text" id="fastest_lap" name="fastest_lap" class="rounded-lg p-2 w-12" value="0">
+                                    <input type="text" id="fastest_lap" name="fastest_lap" class="rounded-lg p-2 w-10" value="0">
                                 </div>
-                                <div class="flex items-center p-2">
+                                {{-- <div class="flex items-center p-2">
                                     <label for="pole_position">Pole Position</label>
                                 </div>
                                 <div class="p-2">
-                                    <input type="text" id="pole_position" name="pole_position" class="rounded-lg p-2 w-12" value="0">
+                                    <input type="text" id="pole_position" name="pole_position" class="rounded-lg p-2 w-10" value="0">
+                                </div> --}}
+
+                                <div class="flex items-center inline-flex">
+                                    <p class="p-2"> Drop weeks enabled: </p>
+                                    <input type="checkbox" name="enabled_drop_weeks" class="form-checkbox h-5 w-5 text-blue-600 ml-10 rounded-sm enabled_drop_weeks" value="true">
+                                </div>
+                                <div class="flex"></div>
+                                <div class="flex items-center p-2">
+                                    <label class="showDropWeekOptions">Number of races before drop weeks start</label>
+                                </div>
+                                <div class="p-2">
+                                    <input type="text" id="raceCountBeforeDropWeeks" name="start_of_drop_score" class="rounded-lg p-2 w-10 showDropWeekOptions" value="8">
+                                </div>
+                                <div class="flex items-center p-2">
+                                    <label class="showDropWeekOptions">Number of lowest score races to drop</label>
+                                </div>
+                                <div class="p-2">
+                                    <input type="text" id="countOfDroppedRaces" name="races_to_drop" class="rounded-lg p-2 w-10 showDropWeekOptions" value="4">
                                 </div>
                             </div>
                         </div>
                         <br>
-                        <button class="mt-5 bg-blue-600 text-white py-2 px-4 rounded-xl hover:bg-blue-700 mb-10">Create</button>
+                        <div class="flex justify-center items-center pt-4">
+                            <button class="bg-blue-600 text-white py-2 px-4 rounded-xl hover:bg-blue-700 mb-10">Save</button>
+                            <div class="px-10 pb-10">
+                                <a class="bg-blue-600 text-white py-2 px-4 rounded-xl hover:bg-blue-700" href="/league/{{ $league->first()->leagueId }}">Cancel</a>
+                            </div>
+                        </div>
                     </form>
                     </div>
                 </div>
@@ -127,15 +149,13 @@
 
     listItems.forEach(item => {
         item.addEventListener('click', () => {
-            // Get the value of the 'data-tab' attribute
             const tab = item.getAttribute('id');
-            // Update the content based on the clicked tab
             const allTabs = document.querySelectorAll('[data-tab="tabs"]');
             const qualifyingBody = document.getElementById('qualifyingBody');
             const heatBody = document.getElementById('heatBody');
             const consolationBody = document.getElementById('consolationBody');
             const featureBody = document.getElementById('featureBody');
-            const bodys = [qualifyingBody, heatBody, consolationBody, featureBody];
+            const bodys = [qualifyingBody, heatBody, consolationBody, featureBody, extraBody];
             bodys.forEach(bod => {
                 bod.classList.add('hidden');
             })
@@ -160,12 +180,33 @@
                 const feature = document.getElementById('feature');
                 feature.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";
             } else if(tab === 'extra') {
+                const allowDropWeeksCheckbox = document.querySelector('.enabled_drop_weeks');
+                const showDropWeekOptions = document.querySelectorAll('.showDropWeekOptions');
+
+                allowDropWeeksCheckbox.addEventListener('change', function () {
+                    showDropWeekOptions.forEach((element) => {
+                        if (!this.checked) {
+                            element.classList.remove('visible');
+                        } else {
+                            element.classList.add('visible');
+                        }
+                    })
+                });
+
+                const areDropWeeksEnabled = allowDropWeeksCheckbox.checked;
+                showDropWeekOptions.forEach((element) => {
+                        if (areDropWeeksEnabled) {
+                            allowDropWeeksCheckbox.checked = true;
+                            element.classList.add('visible');
+                        } else {
+                            allowDropWeeksCheckbox.checked = false;
+                            element.classList.remove('visible');
+                        }
+                    });
                 extraBody.className = "";
                 const extra = document.getElementById('extra');
                 extra.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";
             }
         });
     });
-    </script>
-
-
+</script>

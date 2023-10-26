@@ -49,7 +49,7 @@
                         <h1 class="text-4xl font-bold text-center">{{ $league->name }}</h1>
                     </div>
 
-                    @if(Auth::check() && Auth::id() === $league->league_owner_id)
+                    @if(Auth::check() && Auth::id() == $league->league_owner_id)
                         <div class="pr-6 absolute top-4 right-2">
                             <a href="{{route('create_season', ['leagueId' => $league->leagueId])}}" id="modal-button" class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Create Season</a>
                         </div>
