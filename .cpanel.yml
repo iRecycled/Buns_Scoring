@@ -1,4 +1,4 @@
 ---
 deployment:
   tasks:
-    - touch rayishandsome2
+    - touch ../rayishandsome2
