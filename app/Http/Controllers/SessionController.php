@@ -105,6 +105,7 @@ class SessionController extends Controller
 
     private function updateRacePoints($seasonId, $results){
         $scoringQuery = Scoring::where('season_id', $seasonId)->get();
+        if()
         $qualy_points = json_decode($scoringQuery[0]->qualifying, true);
         $heat_points = json_decode($scoringQuery[0]->heat, true);
         $consolation_points = json_decode($scoringQuery[0]->consolation, true);
