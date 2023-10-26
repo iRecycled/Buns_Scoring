@@ -18,3 +18,6 @@ yarn-error.log
 /.vscode
 NUL
 laradock
+app.js
+.htaccess
+tmp/
