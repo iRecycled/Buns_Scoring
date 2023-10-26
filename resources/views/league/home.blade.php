@@ -50,9 +50,19 @@
                     </div>
 
                     @if(Auth::check() && Auth::id() == $league->league_owner_id)
-                        <div class="pr-6 absolute top-4 right-2">
-                            <a href="{{route('create_season', ['leagueId' => $league->leagueId])}}" id="modal-button" class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Create Season</a>
+
+                    <form method="POST" action="{{$leagueId}}/delete">
+                        {{ csrf_field() }}
+                        <input class="hidden" name="userId" value="{{Auth::id()}}">
+                        <input class="hidden" name="leagueId" value={{$league->leagueId}}>
+                        <div class="pr-6 absolute top-4 right-48">
+                            <button type="submit" class="text-lg p-2 float-right bg-red-500 hover:bg-red-600 rounded-xl text-gray-100">Delete League</button>
                         </div>
+                    </form>
+
+                    <div class="pr-6 absolute top-4 right-2">
+                        <a href="{{route('create_season', ['leagueId' => $league->leagueId])}}" id="modal-button" class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Create Season</a>
+                    </div>
                     @endif
                     <p class="text-lg my-3 mx-auto text-center">{{ $league->description }}</p>
                 </div>
@@ -66,15 +76,29 @@
                                   <tr>
                                     <th class="border-b border-black pr-2 pl-2">Season Name</th>
                                     <th class="border-b border-l border-black pl-2 pr-2">Seasons</th>
+                                    @if (Auth::check() && Auth::id() == $league->league_owner_id)
+                                        <th class="border-b border-l"></th>
+                                    @endif
                                   </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($seasons as $leagues_seasons)
+                                    @foreach ($seasons as $leagues_season)
                                     <tr>
                                         <td class="border-r border-black">
-                                            <a href="{{ route('season.showSeason', ['id' => $leagues_seasons->id]) }} " class="text-blue-500 underline p-2"> {{  $leagues_seasons->season_name }} </a>
+                                            <a href="{{ route('season.showSeason', ['id' => $leagues_season->id]) }} " class="text-blue-500 underline p-2"> {{  $leagues_season->season_name }} </a>
                                         </td>
-                                        <td class="pr-1 pl-2">Season {{ $leagues_seasons->season_count }}</td>
+                                        <td class="pr-1 pl-2">Season {{ $leagues_season->season_count }}</td>
+                                        @if (Auth::check() && Auth::id() == $league->league_owner_id)
+                                        <td>
+                                            <form method="POST" action="{{$league->leagueId}}/{{$leagues_season->id}}/delete" enctype="multipart/form-data">
+                                                @csrf
+                                                <input class="hidden" name="userId" value="{{Auth::id()}}">
+                                                <input class="hidden" name="leagueId" value="{{$league->leagueId}}">
+                                                <input class="hidden" name="seasonId" value="{{$leagues_season->id}}">
+                                                <button id="delete-button" class="text-red-500 px-2">Delete</button>
+                                            </form>
+                                        </td>
+                                        @endif
                                       </tr>
                                 @endforeach
 
@@ -94,5 +118,8 @@
         </div>
         {{-- <footer class="h-48 bg-gray-100">Footer</footer> --}}
       </div>
+      <script>
+
+      </script>
 </x-app-layout>
 </html>

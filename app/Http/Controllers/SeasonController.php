@@ -75,7 +75,6 @@ class SeasonController extends Controller
         }
         catch(Exception $e){
             DB::rollBack();
-            dd($e);
             return redirect()->back()->withErrors(['message' => $e->getMessage()]);
         }
     }

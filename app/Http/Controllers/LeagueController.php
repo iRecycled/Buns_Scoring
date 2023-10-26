@@ -51,4 +51,37 @@ class LeagueController extends Controller
             'seasons',
         ));
     }
+
+    public function deleteSeason(Request $req) {
+        try {
+            $leagueOwnerId = League::where('leagueId', $req->leagueId)->pluck('league_owner_id');
+            DB::beginTransaction();
+            if($leagueOwnerId && $leagueOwnerId[0] == $req->userId) {
+                Season::where('league_id', $req->leagueId)->where('id', $req->seasonId)->delete();
+                Scoring::where('league_id', $req->leagueId)->where('id', $req->seasonId)->delete();
+                Session::where('league_id', $req->leagueId)->where('id', $req->seasonId)->delete();
+            }
+            DB::commit();
+            return redirect("/league/". $req->leagueId)->with('success', 'League deleted successfully');
+        } catch(Exception $e) {
+            return $this->showLeague($req->leagueId);
+        }
+    }
+
+    public function deleteLeague(Request $req) {
+        try {
+            $leagueOwnerId = League::where('leagueId', $req->leagueId)->pluck('league_owner_id');
+            DB::beginTransaction();
+            if($leagueOwnerId && $leagueOwnerId[0] == $req->userId) {
+                League::where('leagueId', $req->leagueId)->delete();
+                Season::where('league_id', $req->leagueId)->delete();
+                Scoring::where('league_id', $req->leagueId)->delete();
+                Session::where('league_id', $req->leagueId)->delete();
+            }
+            DB::commit();
+            return redirect("")->with('success', 'League deleted successfully');
+        } catch(Exception $e) {
+            return $this->showLeague($req->leagueId);
+        }
+    }
 }

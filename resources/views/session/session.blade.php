@@ -49,7 +49,7 @@
             </div>
             <div class="py-4 text-center flex justify-between items-center">
                 <div class="flex-1">
-                    <select class="race-type-dropdown" name="simsession_name_selector">
+                    <select class="simsession_name_selector" name="simsession_name_selector">
                     </select>
                 </div>
                 @if (Auth::check() && Auth::id() == $league->league_owner_id)
@@ -107,7 +107,7 @@
                         <a id="addDriverButton" class="p-2 bg-blue-400 hover:bg-blue-500 rounded-xl">Add Driver</a>
                     </div>
                 </div>
-                <form id="driverForm" method="POST">
+                <form id="driverForm" method="POST" action="{{ url("/session/" . $sessions[0]->subsession_id . "/add-penalty")}}">
                     @csrf
                     <div class="modal-body">
                         <ul id="driverList" name="penalty-data">
@@ -174,7 +174,7 @@
     }
 
     let raceTypeArray = @json($types);
-    populateDropdownOptions(raceTypeArray, '.race-type-dropdown');
+    populateDropdownOptions(raceTypeArray, '.simsession_name_selector');
 
     let driversArray = @json($drivers);
 
@@ -249,11 +249,9 @@
     window.addEventListener("load", handleSelectedValueChange);
 
     populateDropdownOptions(driversArray, '.driver-dropdown');
-
     document.getElementById('addDriverButton').addEventListener('click', function () {
         const driverList = document.getElementById('driverList');
         let driverDropdown = document.querySelector('.driver-dropdown');
-        let raceTypeDropdown = document.querySelector('.race-type-dropdown');
 
         if(!driverDropdown){
             driverDropdown = document.createElement('select');
@@ -262,13 +260,10 @@
         } else {
             driverDropdown = driverDropdown.cloneNode(true);
         }
-        if(!raceTypeDropdown) {
-            raceTypeDropdown = document.createElement('select');
-            raceTypeDropdown.name = 'penalty-session[]';
-            raceTypeDropdown.className = 'race-type-dropdown';
-        } else {
-            raceTypeDropdown = raceTypeDropdown.cloneNode(true);
-        }
+        let raceTypeDropdown = selected.cloneNode(true);
+        raceTypeDropdown.name = 'penalty-session[]';
+        raceTypeDropdown.className = 'race-type-dropdown';
+
         const penaltyPointsInput = `<input name="penaltyPoints[]" type="number" class="penaltyPoints" placeholder="Penalty Points"></input>`;
         const penaltyTimeInput = `<input name="penaltyTime[]" type="number" class="penaltyTime" placeholder="Penalty Time (seconds)"></input>`;
         const removeButton = `<a type="button" class="removeRowButton p-2 rounded text-center bg-red-500 hover:bg-red-600">X</a>`;
