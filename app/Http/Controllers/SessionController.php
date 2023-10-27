@@ -155,7 +155,7 @@ class SessionController extends Controller
                             $racer->race_points = $feature_points[$racer->finish_position];
                             break;
                         default:
-                            if(strpos($racer->simsession_name, 'HEAT') !== false){
+                            if(strpos($racer->simsession_name, 'HEAT') != false){
                                 $racer->race_points = $heat_points[$racer->finish_position];
                             }
                             break;
