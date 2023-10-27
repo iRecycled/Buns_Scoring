@@ -101,7 +101,6 @@ class SessionController extends Controller
                 $tempResults[] = $result;
             }
         } catch (Exception $e){
-            dd($e);
         }
         return $tempResults;
     }

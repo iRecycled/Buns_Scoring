@@ -263,7 +263,7 @@ class SeasonController extends Controller
       private function calcInterval($simsession_name, $subsession_id, $leadersLapsComplete){
       $sessions = Session::where('simsession_name', $simsession_name)->where('subsession_id', $subsession_id)->get(['id','finish_position', 'interval', 'laps_completed']);
         foreach ($sessions as $race) {
-            if($race->interval == '-' && $race->finish_position !== 1){
+            if($race->interval == '-' && $race->finish_position != 1){
                 $lapsBehind = $leadersLapsComplete - $race->laps_completed;
                 $race->interval = "-" . abs($lapsBehind) . " laps";
             }
