@@ -92,7 +92,7 @@ class SessionController extends Controller
                 $remainingSeconds = $result->actualInterval % 60;
                 $milliseconds = substr(sprintf('%0.3f', $result->actualInterval - floor($result->actualInterval)), 2);
                 $result->interval = "{$minutes}:" . str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . ".{$milliseconds}";
-            } else if(strpos($result->actualInterval, "laps") === false ){
+            } else if(strpos($result->actualInterval, "laps") == false ){
                 $remainingSeconds = $result->actualInterval % 60;
                 $milliseconds = substr(sprintf('%0.3f', $result->actualInterval - floor($result->actualInterval)), 2);
                 $result->interval = str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . ".{$milliseconds}";

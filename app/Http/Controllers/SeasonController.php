@@ -288,11 +288,9 @@ class SeasonController extends Controller
         $consolation_points = json_decode($scoringQuery[0]->consolation, true);
         $feature_points = json_decode($scoringQuery[0]->feature, true);
         $fastest_lap_points = $scoringQuery[0]->fastest_lap;
-        // $pole_points = (int)str_replace('"', '', $scoringQuery[5]->scoring_json);
 
         $fastestDrivers = [];
         $lowestFastestLapTime = null;
-        // $polePositionDrivers = [];
         $validSessionPattern = '/^(QUALIFY|CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
         $validSessionPatternWithoutQualy = '/^(CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
         foreach($results as $racer) {
@@ -312,10 +310,6 @@ class SeasonController extends Controller
                             $lowestFastestLapTime[$sessionType] = $totalSeconds;
                             $fastestDrivers[$sessionType] = $racer;
                         }
-                        //can be done by just assigning points in qualifying points
-                        // if ($racer->finish_position == 1){
-                        //     $polePositionDrivers[$sessionType] = $racer;
-                        // }
                     }
                 }
                 switch ($racer->simsession_name) {
@@ -338,12 +332,7 @@ class SeasonController extends Controller
                   Session::where('id', $racer->id)->update(['race_points' => $racer->race_points]);
             }
         }
-        // $driverIdsPole = array_column($polePositionDrivers, 'id');
         $driverIdsFastest = array_column($fastestDrivers, 'id');
-        // Session::whereIn('id', $driverIdsPole)
-        // ->update([
-        //     'race_points' => DB::raw('race_points + ' . $pole_points)
-        // ]);
 
         Session::whereIn('id', $driverIdsFastest)
             ->update([

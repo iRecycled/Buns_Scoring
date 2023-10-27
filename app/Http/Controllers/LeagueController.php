@@ -7,7 +7,7 @@ use App\Models\Session;
 use App\Models\Season;
 use App\Models\Scoring;
 use Exception;
-// use iRacingPHP\iRacing;
+use iRacingPHP\iRacing;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\ErrorHandler\Debug;
 

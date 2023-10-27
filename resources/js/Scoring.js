@@ -27,13 +27,13 @@ export default class Scoring {
             console.log(tab);
 
             // Update the content based on the clicked tab
-            if (tab === 'qualifying') {
+            if (tab == 'qualifying') {
                 contentContainer.textContent = 'Qualifying content here.';
-            } else if (tab === 'heats') {
+            } else if (tab == 'heats') {
                 contentContainer.textContent = 'Heats content here.';
-            } else if (tab === 'consolation') {
+            } else if (tab == 'consolation') {
                 contentContainer.textContent = 'Consolation content here.';
-            } else if (tab === 'feature') {
+            } else if (tab == 'feature') {
                 contentContainer.textContent = 'Feature content here.';
             }
 
