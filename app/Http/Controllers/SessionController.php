@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Session;
 use App\Models\Scoring;
-
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -86,18 +86,22 @@ class SessionController extends Controller
 
     private function convertIntervalBackToMinutes($results){
         $tempResults = [];
-        foreach ($results as $key => $result) {
-            if ($result->actualInterval > 60) {
-                $minutes = floor($result->actualInterval / 60);
-                $remainingSeconds = $result->actualInterval % 60;
-                $milliseconds = substr(sprintf('%0.3f', $result->actualInterval - floor($result->actualInterval)), 2);
-                $result->interval = "{$minutes}:" . str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . ".{$milliseconds}";
-            } else if(strpos($result->actualInterval, "laps") == false ){
-                $remainingSeconds = $result->actualInterval % 60;
-                $milliseconds = substr(sprintf('%0.3f', $result->actualInterval - floor($result->actualInterval)), 2);
-                $result->interval = str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . ".{$milliseconds}";
+        try {
+            foreach ($results as $key => $result) {
+                if ($result->actualInterval > 60) {
+                    $minutes = floor($result->actualInterval / 60);
+                    $remainingSeconds = $result->actualInterval % 60;
+                    $milliseconds = substr(sprintf('%0.3f', $result->actualInterval - floor($result->actualInterval)), 2);
+                    $result->interval = "{$minutes}:" . str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . ".{$milliseconds}";
+                } else if(strpos($result->actualInterval, "laps") == false ){
+                    $remainingSeconds = $result->actualInterval % 60;
+                    $milliseconds = substr(sprintf('%0.3f', $result->actualInterval - floor($result->actualInterval)), 2);
+                    $result->interval = str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . ".{$milliseconds}";
+                }
+                $tempResults[] = $result;
             }
-            $tempResults[] = $result;
+        } catch (Exception $e){
+            dd($e);
         }
         return $tempResults;
     }
