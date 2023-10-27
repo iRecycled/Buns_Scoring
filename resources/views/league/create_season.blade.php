@@ -162,24 +162,24 @@
             allTabs.forEach(tab => {
                 tab.className = "text-black tab-link inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-700";
             })
-            if (tab === 'qualifying') {
+            if (tab == 'qualifying') {
                 qualifyingBody.className = "grid grid-cols-4 grid-flow-row gap-2";
                 const qualifying = document.getElementById('qualifying');
                 qualifying.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";
-            } else if (tab === 'heats') {
+            } else if (tab == 'heats') {
                 heatBody.className = "grid grid-cols-4 grid-flow-row gap-2";
                 const heat = document.getElementById('heats');
                 heat.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";
-            } else if (tab === 'consolation') {
+            } else if (tab == 'consolation') {
                 consolationBody.className = "grid grid-cols-4 grid-flow-row gap-2";
                 consolationBody.style.display = 'visible';
                 const consolation = document.getElementById('consolation');
                 consolation.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";
-            } else if (tab === 'feature') {
+            } else if (tab == 'feature') {
                 featureBody.className = "grid grid-cols-4 grid-flow-row gap-2";
                 const feature = document.getElementById('feature');
                 feature.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";
-            } else if(tab === 'extra') {
+            } else if(tab == 'extra') {
                 const allowDropWeeksCheckbox = document.querySelector('.enabled_drop_weeks');
                 const showDropWeekOptions = document.querySelectorAll('.showDropWeekOptions');
 

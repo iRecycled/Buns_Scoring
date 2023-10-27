@@ -190,7 +190,7 @@
         sessionByName.forEach(element => {
             if (element.best_lap_time !== '-') {
                 let time = timeToSeconds(element.best_lap_time);
-                if (fastest === -1 || time < fastest) {
+                if (fastest == -1 || time < fastest) {
                     fastest = time;
                     fastest_time = element.best_lap_time;
                 }
@@ -199,7 +199,7 @@
         var table = document.querySelector(".display");
         table.innerHTML = "";
         sessionByName.forEach(function(element) {
-            if (element.simsession_name === selectedValue) {
+            if (element.simsession_name == selectedValue) {
                 var row = document.createElement("tr");
                 var fields = [
                     "finish_position",
