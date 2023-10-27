@@ -296,8 +296,8 @@ class SeasonController extends Controller
         foreach($results as $racer) {
             if(preg_match($validSessionPattern, $racer->simsession_name)){
                 if (preg_match($validSessionPatternWithoutQualy, $racer->simsession_name)) {
-                    if($racer->best_lap_time !== '-'){
-                        if(strpos($racer->best_lap_time, ':') !== false) {
+                    if($racer->best_lap_time != '-'){
+                        if(strpos($racer->best_lap_time, ':') != false) {
                             list($minutes, $seconds) = explode(':', $racer->best_lap_time);
                         } else {
                             $minutes = 0;
@@ -324,7 +324,7 @@ class SeasonController extends Controller
                         $racer->race_points = $feature_points[$racer->finish_position];
                         break;
                     default:
-                        if(strpos($racer->simsession_name, 'HEAT') !== false){
+                        if(strpos($racer->simsession_name, 'HEAT') != false){
                             $racer->race_points = $heat_points[$racer->finish_position];
                         }
                         break;

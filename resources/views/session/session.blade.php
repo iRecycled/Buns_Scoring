@@ -188,7 +188,7 @@
         let fastest = -1;
         let fastest_time;
         sessionByName.forEach(element => {
-            if (element.best_lap_time !== '-') {
+            if (element.best_lap_time != '-') {
                 let time = timeToSeconds(element.best_lap_time);
                 if (fastest == -1 || time < fastest) {
                     fastest = time;
