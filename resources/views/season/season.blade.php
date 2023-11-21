@@ -125,7 +125,6 @@
                 <form method="POST" action="{{$seasonId}}/update">
                     <div class="flex flex-row">
                             <div>
-                                <input type="text" class="ajaxUrl hidden" value="{{$seasonId}}/get/">
                                 <label for="iRacingLeagueId" class="block text-gray-700 text-sm font-bold mb-2">iRacing League Id:</label>
                                 <input type="text" name="iRacingLeagueId" class="shadow appearance-none border rounded py-2 px-3">
                             </div>
@@ -202,8 +201,13 @@
 
 
     function getSeasonFromLeagueId() {
-        const ajaxURL = document.querySelector(".ajaxUrl").value;
-        console.log(ajaxURL);
+        let url = window.location.href;
+        if (!url.startsWith('https://')) {
+            url = url.replace(/^https?:\/\//i, '');
+            url = 'https://' + url;
+        }
+        url += '/get';
+        console.log(url);
         var dataToSend = $('input[name="iRacingLeagueId"]').val();
         this.clearSeasonList();
         this.toggleLoader();
@@ -212,7 +216,7 @@
                 "_token": "{{ csrf_token() }}",
                 iRacingLeagueId: dataToSend,
                 },
-            url: ajaxURL,
+            url: url,
             method: 'POST',
             success: function (data) {
                 toggleLoader();
