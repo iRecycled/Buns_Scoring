@@ -44,6 +44,7 @@
                                         <th class="px-4">Laps lead</th>
                                         <th class="px-4">Incidents</th>
                                         <th class="px-2">Races</th>
+                                        <th class="px-2">Fastest Laps</th>
                                         <th class="px-4">Wins</th>
                                         @if ($dropWeeksEnabled)
                                             <th class="px-4">Dropped Races</th>
@@ -64,6 +65,7 @@
                                           <td>{{ $user['total_lead'] }}</td>
                                           <td>{{ $user['total_incidents'] }}</td>
                                           <td>{{ $user['total_races'] }}</td>
+                                          <td>{{ $user['fastest_laps'] }}</td>
                                           <td>{{ $user['total_wins'] }}</td>
                                           @if ($dropWeeksEnabled)
                                             <td>{{ $user['races_dropped'] }}</td>

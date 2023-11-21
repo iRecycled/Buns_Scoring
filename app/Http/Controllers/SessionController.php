@@ -15,8 +15,8 @@ class SessionController extends Controller
         $unique_types = $sessions->unique('simsession_name');
         $drivers = $sessions->pluck('display_name')->unique();
         $currentData = $sessions->filter(function ($session) {
-            return $session->penalty_seconds !== null || $session->penalty_points !== null;
-        })->pluck('penalty_seconds', 'penalty_points', 'display_name', 'simsession_name');
+            return $session->penalty_seconds != null || $session->penalty_points != null;
+        });
         foreach($unique_types as $type) {
             $types[] = $type->simsession_name;
         }
@@ -33,13 +33,6 @@ class SessionController extends Controller
             'currentData',
             'calculatedResults'
         ));
-    }
-
-    private function getFastestDriver($collection, $simsession_name) {
-        return $collection->where('simsession_name', $simsession_name)
-        ->where('best_lap_time', '<>', '-')
-        ->sortBy('best_lap_time')
-        ->first();
     }
 
     public function submitPenalties(Request $request, $sessionId){

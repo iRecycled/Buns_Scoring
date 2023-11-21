@@ -24,29 +24,10 @@ class StandingsController extends Controller
             $standings = $standings->concat($tempStanding);
         }
 
-        // $standings = DB::table('sessions')
-        // ->select('display_name',
-        // DB::raw('SUM(race_points) as total_points'),
-        // DB::raw('SUM(laps_completed) as total_laps'),
-        // DB::raw('SUM(incidents) as total_incidents'),
-        // DB::raw('COUNT(*) as total_races'),
-        // DB::raw('SUM(laps_lead) as total_lead'),
-        // DB::raw('SUM(CASE WHEN finish_position = 1 THEN 1 ELSE 0 END) as total_wins'))
-        // ->where('season_id', $seasonId)
-        // ->where('simsession_name', '!=', 'QUALIFY')
-        // ->groupBy('display_name')
-        // ->get();
-
         $scoringQuery = Scoring::where('season_id', $seasonId)->get();
         $dropWeeksEnabled = boolval($scoringQuery[0]->enabled_drop_weeks);
         if($dropWeeksEnabled){
-            $sessions = $standings->filter(function ($sesh) {
-                return !str_contains($sesh->simsession_name, "QUALIFY");
-            });
-            // $sessions = Session::select('display_name', 'race_points')
-            // ->where('season_id', $seasonId)
-            // ->where('simsession_name', '!=', 'QUALIFY')->get();
-            $totalPointsByDriver = $this->applyDropWeeks($sessions, $scoringQuery);
+            $totalPointsByDriver = $this->applyDropWeeks($standings, $scoringQuery);
             foreach($standings as $standing) {
                 if (isset($totalPointsByDriver[$standing->display_name])) {
                     $standing->total_points = $totalPointsByDriver[$standing->display_name];
@@ -69,17 +50,19 @@ class StandingsController extends Controller
                     $racesToDrop = $lowestRacesToDrop;
                 }
             }
+            $fastestLaps = $sessions->where('simsession_name', '!=', "QUALIFY")->whereNotNull('fastest_lap_points')->pluck('fastest_lap_points');
             $NoDroptotalPoints = $sessions->sum('race_points');
             $totalPointsWithDrop = $sessions->first()->total_points;
             $pointsDropped = $NoDroptotalPoints - $totalPointsWithDrop;
             return [
                 'display_name' => $displayName,
-                'total_points' => isset($sessions->first()->total_points) ? $sessions->first()->total_points : $sessions->sum('race_points'),
+                'total_points' => isset($sessions->first()->total_points) ? $sessions->first()->total_points + $fastestLaps->sum() : $sessions->sum('race_points') + $fastestLaps->sum(),
                 'total_laps' => $sessions->sum('laps_completed'),
                 'total_incidents' => $sessions->sum('incidents'),
                 'total_races' => $totalRaces,
+                'fastest_laps' => count($fastestLaps),
                 'total_lead' => $sessions->sum('laps_lead'),
-                'total_wins' => $sessions->where('finish_position', 1)->count(),
+                'total_wins' => $sessions->where('finish_position', 1)->where('simsession_name', '!=', 'QUALIFY')->count(),
                 'races_dropped' => $racesToDrop,
                 'points_dropped' => $pointsDropped
             ];
@@ -91,10 +74,17 @@ class StandingsController extends Controller
         return view ('season.standings.standings', compact('seasonId', 'standings', 'league','dropWeeksEnabled'));
     }
 
-    private function applyDropWeeks($sessions, $scoringQuery){
+    private function applyDropWeeks($standings, $scoringQuery){
+        $sessions = $standings->filter(function ($sesh) {
+            return !str_contains($sesh->simsession_name, "QUALIFY");
+        });
+        $qualySessions = $standings->filter(function ($sesh) {
+            return str_contains($sesh->simsession_name, "QUALIFY");
+        });
         $startOfDropWeekScoring = $scoringQuery[0]->drop_weeks_start;
         $lowestRacesToDrop = $scoringQuery[0]->races_to_drop;
         $raceResultsByDriver = [];
+        $qualyResultsByDriver = [];
         foreach ($sessions as $session) {
             $driverName = $session['display_name'];
             $racePoints = (int)$session['race_points'];
@@ -103,6 +93,14 @@ class StandingsController extends Controller
                 $raceResultsByDriver[$driverName] = [];
             }
             $raceResultsByDriver[$driverName][] = $racePoints;
+        }
+        foreach ($qualySessions as $session) {
+            $driverName = $session['display_name'];
+            $racePoints = (int) $session['race_points'];
+            if(!isset($qualyResultsByDriver[$driverName])) {
+                $qualyResultsByDriver[$driverName][] = [];
+            }
+            $qualyResultsByDriver[$driverName][] = $racePoints;
         }
         foreach ($raceResultsByDriver as $driverName => &$raceResults) {
             arsort($raceResults);
@@ -123,6 +121,9 @@ class StandingsController extends Controller
         // dd($raceResultsByDriver);
         foreach ($raceResultsByDriver as $driverName => $raceResults) {
             $finalTotalPointsByDriver[$driverName] = array_sum($raceResults);
+        }
+        foreach ($qualyResultsByDriver as $driverName => $raceResults) {
+            $finalTotalPointsByDriver[$driverName] += array_sum($raceResults);
         }
         return $finalTotalPointsByDriver;
     }
@@ -195,31 +196,5 @@ class StandingsController extends Controller
         }
         return $mergedResultsForAllSessions;
     }
-
-    private function getRacePoints($driver, $scoringQuery, $race_session) {
-        $qualy_points = json_decode($scoringQuery[0]->qualifying, true);
-        $heat_points = json_decode($scoringQuery[0]->heat, true);
-        $consolation_points = json_decode($scoringQuery[0]->consolation, true);
-        $feature_points = json_decode($scoringQuery[0]->feature, true);
-        $race_points = 0;
-        switch ($race_session) {
-            case 'QUALIFY':
-                $race_points = $qualy_points[$driver->finish_position];
-                break;
-            case 'CONSOLATION':
-                $race_points = $consolation_points[$driver->finish_position];
-                break;
-            case 'RACE':
-            case 'FEATURE':
-                $race_points = $feature_points[$driver->finish_position];
-                break;
-            default:
-            if(str_contains($race_session, "HEAT")){
-                    $race_points = $heat_points[$driver->finish_position];
-                }
-                break;
-          }
-          return $race_points;
-      }
 }
 
