@@ -53,7 +53,6 @@ class StandingsController extends Controller
             $fastestLaps = $sessions->where('simsession_name', '!=', "QUALIFY")->whereNotNull('fastest_lap_points')->pluck('fastest_lap_points');
             $NoDroptotalPoints = $sessions->sum('race_points');
             $totalPointsWithDrop = $sessions->first()->total_points;
-            dd('before drop = '. $NoDroptotalPoints . "  After drop = ". $totalPointsWithDrop);
             $pointsDropped = $NoDroptotalPoints - $totalPointsWithDrop;
             return [
                 'display_name' => $displayName,
@@ -114,7 +113,10 @@ class StandingsController extends Controller
                     $racesToDrop = $lowestRacesToDrop;
                 }
 
-                // $pointsRemovedByDrops = array_sum(array_slice($raceResults, -$racesToDrop)); //helpful to check if this is working
+                $pointsRemovedByDrops = array_sum(array_slice($raceResults, -$racesToDrop)); //helpful to check if this is working
+                if($driverName == "Raymond Aguilar"){
+                    dd($driverName . " " . $pointsRemovedByDrops);
+                }
                 $raceResults = array_slice($raceResults, 0, -$racesToDrop);
             }
         }
