@@ -102,6 +102,7 @@ class StandingsController extends Controller
             }
             $qualyResultsByDriver[$driverName][] = $racePoints;
         }
+        dd($raceResultsByDriver);
         foreach ($raceResultsByDriver as $driverName => &$raceResults) {
             arsort($raceResults);
             if(count($raceResults) > $startOfDropWeekScoring) {
@@ -113,10 +114,7 @@ class StandingsController extends Controller
                     $racesToDrop = $lowestRacesToDrop;
                 }
 
-                $pointsRemovedByDrops = array_sum(array_slice($raceResults, -$racesToDrop)); //helpful to check if this is working
-                if($driverName == "Raymond Aguilar"){
-                    dd($driverName . " " . $pointsRemovedByDrops);
-                }
+                // $pointsRemovedByDrops = array_sum(array_slice($raceResults, -$racesToDrop)); //helpful to check if this is working
                 $raceResults = array_slice($raceResults, 0, -$racesToDrop);
             }
         }
