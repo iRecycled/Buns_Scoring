@@ -45,21 +45,24 @@
                                         <th class="px-4">Incidents</th>
                                         <th class="px-2">Races</th>
                                         <th class="px-4">Wins</th>
+                                        <th class="px-4">Dropped Races</th>
 
                                       </tr>
                                     </thead>
                                     <tbody>
                                         {{-- Javascript creates table here --}}
-                                        @foreach ($standings as $index => $user)
+                                        @foreach ($standings as $user)
                                         <tr>
-                                            <td>{{ $index + 1 }}</td>
-                                          <td>{{ $user->total_points }}</td>
-                                          <td>{{ $user->display_name }}</td>
-                                          <td>{{ $user->total_laps }}</td>
-                                          <td>{{ $user->total_lead }}</td>
-                                          <td>{{ $user->total_incidents }}</td>
-                                          <td>{{ $user->total_races }}</td>
-                                          <td>{{ $user->total_wins }}</td>
+                                            {{-- @dd($user) --}}
+                                            <td>{{ $loop->index + 1 }}</td>
+                                          <td>{{ $user['total_points'] }}</td>
+                                          <td>{{ $user['display_name'] }}</td>
+                                          <td>{{ $user['total_laps'] }}</td>
+                                          <td>{{ $user['total_lead'] }}</td>
+                                          <td>{{ $user['total_incidents'] }}</td>
+                                          <td>{{ $user['total_races'] }}</td>
+                                          <td>{{ $user['total_wins'] }}</td>
+                                          <td>{{ $user['races_dropped'] }}</td>
 
                                         </tr>
                                       @endforeach

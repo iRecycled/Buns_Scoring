@@ -6,6 +6,7 @@ use App\Models\League;
 use App\Models\Session;
 use App\Models\Season;
 use App\Models\Scoring;
+use iRacingPHP\iRacing;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Exception;
@@ -70,7 +71,6 @@ class SeasonController extends Controller
             $scoring->races_to_drop = (int) $request->races_to_drop;
             $scoring->save();
             DB::commit();
-            $this->updateRacePoints($seasonId);
             return redirect("/season/". $seasonId)->with('success', 'Scoring updated successfully');
         }
         catch(Exception $e){
@@ -122,132 +122,110 @@ class SeasonController extends Controller
         ));
     }
 
-    public function showStandings($seasonId){
-      $seasons = Season::where('id',$seasonId)->distinct()->get();
-      $league = $seasons->first()->league;
-      $standings = DB::table('sessions')
-      ->select('display_name',
-      DB::raw('SUM(race_points) as total_points'),
-      DB::raw('SUM(laps_completed) as total_laps'),
-      DB::raw('SUM(incidents) as total_incidents'),
-      DB::raw('COUNT(*) as total_races'),
-      DB::raw('SUM(laps_lead) as total_lead'),
-      DB::raw('SUM(CASE WHEN finish_position = 1 THEN 1 ELSE 0 END) as total_wins'))
-      ->where('season_id', $seasonId)
-      ->where('simsession_name', '!=', 'QUALIFY')
-      ->groupBy('display_name')
-      ->get();
-
-      $scoringQuery = Scoring::where('season_id', $seasonId)->get();
-      $dropWeeksEnabled = boolval($scoringQuery[0]->enabled_drop_weeks);
-      if($dropWeeksEnabled){
-        $sessions = Session::select('display_name', 'race_points')
-        ->where('season_id', $seasonId)
-        ->where('simsession_name', '!=', 'QUALIFY')->get();
-        $totalPointsByDriver = $this->applyDropWeeks($sessions, $scoringQuery);
-        foreach($standings as $standing) {
-            if (isset($totalPointsByDriver[$standing->display_name])) {
-                $standing->total_points = $totalPointsByDriver[$standing->display_name];
-            }
-        }
-      }
-      $standings = $standings->sortByDesc('total_points')->values();
-      $league = $seasons->first()->league;
-
-      return view ('season.standings.standings', compact('seasonId', 'standings', 'league'));
-    }
-
-    private function applyDropWeeks($sessions, $scoringQuery){
-        $startOfDropWeekScoring = $scoringQuery[0]->drop_weeks_start;
-        $lowestRacesToDrop = $scoringQuery[0]->races_to_drop;
-
-        $raceResultsByDriver = [];
-        foreach ($sessions as $session) {
-            $driverName = $session->display_name;
-            $racePoints = $session->race_points;
-
-            if (!isset($raceResultsByDriver[$driverName])) {
-                $raceResultsByDriver[$driverName] = [];
-            }
-            $raceResultsByDriver[$driverName][] = $racePoints;
-        }
-
-        foreach ($raceResultsByDriver as $driverName => &$raceResults) {
-            arsort($raceResults);
-            if(count($raceResults) > $startOfDropWeekScoring) {
-                $racesToDrop = $lowestRacesToDrop;
-                $totalRaces = count($raceResults);
-                if(($totalRaces - $lowestRacesToDrop) < $startOfDropWeekScoring){
-                    $racesToDrop = abs($startOfDropWeekScoring - $totalRaces);
-                }
-                // $pointsRemovedByDrops = array_sum(array_slice($raceResults, -$racesToDrop)); //helpful to check if this is working
-                $raceResults = array_slice($raceResults, 0, -$racesToDrop);
-            }
-        }
-        $finalTotalPointsByDriver = [];
-        foreach ($raceResultsByDriver as $driverName => $raceResults) {
-            $finalTotalPointsByDriver[$driverName] = array_sum($raceResults);
-        }
-        return $finalTotalPointsByDriver;
-    }
-
     public function newSessionSubmit(Request $request, $leagueId, $seasonId) {
         info($request->file('json_file'));
         if($request->file('json_file')){
           $file = $request->file('json_file');
           $json = $file->getContent();
           $data = json_decode($json);
+        } else {
+            return redirect()->back()->withErrors(['message' => 'Failed to load file']);
         }
-        else {
-          return redirect()->back()->withErrors(['message' => 'Failed to load file']);
-        }
-
-          $sessionId = $data->subsession_id;
-          $results = $data->session_results;
-          $validSessionPattern = '/^(QUALIFY|CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
+        $sessionId = $data->subsession_id;
+        $results = $data->session_results;
+        $validSessionPattern = '/^(QUALIFY|CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
+        $sessionResultsToInsert = [];
           foreach($results as $result){
+            //looping over race types (practice, qualy, heat, race, etc)
             if(preg_match($validSessionPattern, $result->simsession_name)){
-                foreach($result->results as $realResults){
+                //looping over each driver in the session
+                foreach($result->results as $driver){
                     $record = [
                         'subsession_id' => $sessionId,
                         'simsession_name' => $result->simsession_name,
-                        'finish_position' => ++$realResults->finish_position,
+                        'finish_position' => ++$driver->finish_position,
                         'race_points' => 0,
-                        'display_name' => $realResults->display_name,
+                        'display_name' => $driver->display_name,
                         'league_id' => $leagueId,
                         'season_id' => $seasonId,
-                        'laps_lead' => $realResults->laps_lead,
-                        'laps_completed' => $realResults->laps_complete,
-                        'average_lap_time' => $this->convertTime($realResults->average_lap),
-                        'best_lap_time' => $this->convertTime($realResults->best_lap_time),
-                        'best_lap_number' => $realResults->best_lap_num,
-                        'qualifying_lap_time' => $this->convertTime($realResults->best_qual_lap_time),
-                        'starting_pos' => ++$realResults->starting_position,
-                        'interval' => $this->convertTime($realResults->interval),
-                        'incidents' => $realResults->incidents,
-                        'club_name' => $realResults->club_name
+                        'laps_lead' => $driver->laps_lead,
+                        'laps_completed' => $driver->laps_complete,
+                        'average_lap_time' => $this->convertTime($driver->average_lap),
+                        'best_lap_time' => $this->convertTime($driver->best_lap_time),
+                        'best_lap_number' => $driver->best_lap_num,
+                        'qualifying_lap_time' => $this->convertTime($driver->best_qual_lap_time),
+                        'starting_pos' => ++$driver->starting_position,
+                        'interval' => $this->convertTime($driver->interval),
+                        'incidents' => $driver->incidents,
+                        'club_name' => $driver->club_name,
+                        'license_category' => $data->license_category,
+                        'corners_per_lap' => $data->corners_per_lap,
+                        'track_name' => $data->track->track_name,
+                        'config_name' => $data->track->config_name,
+                        'temp_value' => $data->weather->temp_value,
+                        'temp_units' => $data->weather->temp_units,
+                        'rel_humidity' => $data->weather->rel_humidity,
+                        'race_date' => Carbon::parse($data->start_time)->format('Y-m-d')
                     ];
-                  DB::table('sessions')->updateOrInsert([
-                      'simsession_name' => $result->simsession_name,
-                      'finish_position' => $realResults->finish_position,
-                      'license_category' => $data->license_category,
-                      'corners_per_lap' => $data->corners_per_lap,
-                      'track_name' => $data->track->track_name,
-                      'config_name' => $data->track->config_name,
-                      'temp_value' => $data->weather->temp_value,
-                      'temp_units' => $data->weather->temp_units,
-                      'rel_humidity' => $data->weather->rel_humidity,
-                      'subsession_id' => $sessionId,
-                      'race_date' => Carbon::parse($data->start_time)->format('Y-m-d')
-                    ], $record);
-                  }
+                    $sessionResultsToInsert[] = $record;
                 }
+            }
           }
-          $this->setIntervalByLeader($sessionId);
-          $this->updateRacePoints($seasonId);
-          $url = url('session/'. $sessionId);
-          return redirect($url)->with(compact('leagueId'));
+          Session::upsert($sessionResultsToInsert, [
+            'subsession_id',
+            'simsession_name',
+            'finish_position',
+            'race_points',
+            'display_name',
+            'league_id',
+            'season_id',
+            'laps_lead',
+            'laps_completed',
+            'average_lap_time',
+            'best_lap_time',
+            'best_lap_number',
+            'qualifying_lap_time',
+            'starting_pos',
+            'interval',
+            'incidents',
+            'club_name',
+            'license_category',
+            'corners_per_lap',
+            'track_name',
+            'config_name',
+            'temp_value',
+            'temp_units',
+            'rel_humidity',
+            'race_date'
+          ]);
+        $sessionResults = $sessions = Session::where('subsession_id', $sessionId)
+        ->get(['id', 'simsession_name', 'finish_position', 'interval', 'laps_completed', 'best_lap_time']);
+        $this->setIntervalByLeader($sessionResults);
+        $unique_types = $sessionResults->unique('simsession_name');
+        $fastest_lap_points = Scoring::select('fastest_lap')->where('season_id', $seasonId)->get();
+        foreach($unique_types as $key => $type) {
+          $driver = $this->getFastestDriver($sessionResults, $type->simsession_name);
+          $driver->fastest_lap_points = json_decode($fastest_lap_points[0]->fastest_lap);
+          $driver->save();
+        }
+        $url = url('season/'. $seasonId);
+        return redirect($url)->with(compact('leagueId'));
       }
+
+    private function getFastestDriver($collection, $simsession_name) {
+        return $collection->where('simsession_name', $simsession_name)
+        ->filter(function ($item) {
+            return ($item->best_lap_time != "-");
+        })
+        ->sortBy(function ($item) {
+            if (strpos($item->best_lap_time, ':') != false) {
+                [$minutes, $seconds] = explode(':', $item->best_lap_time);
+                return $minutes * 60 + $seconds;
+            } else {
+                return $item->best_lap_time;
+            }
+        })->first();
+    }
 
       private function convertTime($time){
         if($time <= 0) return "-";
@@ -260,84 +238,25 @@ class SeasonController extends Controller
         return sprintf('%d:%02d.%03d', $minutes, $seconds, $milliseconds);
       }
 
-      private function calcInterval($simsession_name, $subsession_id, $leadersLapsComplete){
-      $sessions = Session::where('simsession_name', $simsession_name)->where('subsession_id', $subsession_id)->get(['id','finish_position', 'interval', 'laps_completed']);
-        foreach ($sessions as $race) {
-            if($race->interval == '-' && $race->finish_position != 1){
-                $lapsBehind = $leadersLapsComplete - $race->laps_completed;
-                $race->interval = "-" . abs($lapsBehind) . " laps";
-            }
-
-            Session::where('id', $race->id)->update(['interval' => $race->interval]);
-        }
-      }
-
-      private function setIntervalByLeader($subsession_id){
-        $leaders = Session::where('subsession_id', $subsession_id)->where('finish_position', 1)->get(['laps_completed', 'interval', 'simsession_name']);
-        //at most loops 5 times.
-        foreach ($leaders as $leader) {
-            $this->calcInterval($leader->simsession_name, $subsession_id, $leader->laps_completed);
-        }
-    }
-
-    private function updateRacePoints($seasonId){
-        $results = Session::where('season_id', $seasonId)->get();
-        $scoringQuery = Scoring::where('season_id', $seasonId)->get();
-        $qualy_points = json_decode($scoringQuery[0]->qualifying, true);
-        $heat_points = json_decode($scoringQuery[0]->heat, true);
-        $consolation_points = json_decode($scoringQuery[0]->consolation, true);
-        $feature_points = json_decode($scoringQuery[0]->feature, true);
-        $fastest_lap_points = $scoringQuery[0]->fastest_lap;
-
-        $fastestDrivers = [];
-        $lowestFastestLapTime = null;
-        $validSessionPattern = '/^(QUALIFY|CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
-        $validSessionPatternWithoutQualy = '/^(CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
-        foreach($results as $racer) {
-            if(preg_match($validSessionPattern, $racer->simsession_name)){
-                if (preg_match($validSessionPatternWithoutQualy, $racer->simsession_name)) {
-                    if($racer->best_lap_time != '-'){
-                        if(strpos($racer->best_lap_time, ':') != false) {
-                            list($minutes, $seconds) = explode(':', $racer->best_lap_time);
-                        } else {
-                            $minutes = 0;
-                            $seconds = $racer->best_lap_time;
-                        }
-                        list($wholeSeconds, $milliseconds) = explode('.', $seconds);
-                        $totalSeconds = $minutes * 60 + $wholeSeconds + ($milliseconds / 1000);
-                        $sessionType = $racer->simsession_name;
-                        if (!isset($lowestFastestLapTime[$sessionType]) || $totalSeconds < $lowestFastestLapTime[$sessionType]) {
-                            $lowestFastestLapTime[$sessionType] = $totalSeconds;
-                            $fastestDrivers[$sessionType] = $racer;
-                        }
-                    }
+      private function setIntervalByLeader($sessions) {
+        $leadersLapsComplete = $sessions->filter(function ($driver) {
+            return $driver->finish_position == 1;
+        })->pluck('laps_completed', 'simsession_name');
+        $cases = [];
+        $ids = [];
+        if ($leadersLapsComplete) {
+            foreach ($sessions as $race) {
+                if($race->finish_position != 1 && $race->interval == '-') {
+                    $lapsBehind = $leadersLapsComplete[$race->simsession_name] - $race->laps_completed;
+                    $interval = '-' . abs($lapsBehind) . ' laps';
+                    $cases[] = "WHEN {$race->id} THEN '{$interval}'";
+                    $ids[] = $race->id;
                 }
-                switch ($racer->simsession_name) {
-                    case 'QUALIFY':
-                        $racer->race_points = $qualy_points[$racer->finish_position];
-                        break;
-                    case 'CONSOLATION':
-                        $racer->race_points = $consolation_points[$racer->finish_position];
-                        break;
-                    case 'RACE':
-                    case 'FEATURE':
-                        $racer->race_points = $feature_points[$racer->finish_position];
-                        break;
-                    default:
-                        if(strpos($racer->simsession_name, 'HEAT') != false){
-                            $racer->race_points = $heat_points[$racer->finish_position];
-                        }
-                        break;
-                  }
-                  Session::where('id', $racer->id)->update(['race_points' => $racer->race_points]);
             }
+            $ids = implode(',', $ids);
+            $cases = implode(' ', $cases);
+            DB::update("UPDATE sessions SET `interval` = CASE id {$cases} END WHERE id IN ({$ids})");
         }
-        $driverIdsFastest = array_column($fastestDrivers, 'id');
-
-        Session::whereIn('id', $driverIdsFastest)
-            ->update([
-                'race_points' => DB::raw('race_points + ' . $fastest_lap_points)
-            ]);
     }
 
     public function deleteSession(Request $req) {
@@ -351,4 +270,144 @@ class SeasonController extends Controller
         }
         return redirect("/season/". $req->seasonId)->with('success', 'Season deleted successfully');
     }
+
+    public function getiRacingSeasonData(Request $req) {
+        $iRacingLeagueId = $req->iRacingLeagueId;
+        $iracing = new iRacing('npeterson1996@gmail.com', 'haXyVVBYhsnNzcjGW2Mv09X//wyfimI2ccDL7YeIp9A=', true);
+        $seasons = $iracing->league->seasons($iRacingLeagueId);
+        $seasonNames = [];
+        foreach($seasons->seasons as $season){
+            $seasonNames[$season->season_id] = $season->season_name;
+        }
+        return $seasonNames;
+    }
+
+    public function updateSeasonWithiRacingSync(Request $req, $id) {
+        $season = Season::where('id', $id)->first();
+        $season->iracing_leagueId = $req->iRacingLeagueId;
+        $season->iracing_seasonId = $req->iRacingSeasonId;
+        $season->save();
+        $this->createSessionsFromiRacingSync($req->iRacingLeagueId, $req->iRacingSeasonId);
+        return redirect("season/" . $id)->with('success', 'Race has been imported');
+    }
+
+    public function createSessionsFromiRacingSync($leagueId, $seasonId) {
+        $seasonToSync = Season::where('iracing_leagueId', $leagueId)->where('iracing_seasonId', $seasonId)->get();
+        $iracing = new iRacing('npeterson1996@gmail.com', 'haXyVVBYhsnNzcjGW2Mv09X//wyfimI2ccDL7YeIp9A=', true);
+
+        $sessionData = collect($seasonToSync)->flatMap(function ($season) use ($iracing) {
+            // info('start iracing api request for season id '. $season->iracing_leagueId . " " . time());
+            $allSessions = $iracing->league->season_sessions($season->iracing_leagueId, $season->iracing_seasonId, ['results_only' => true]);
+            // info('after iracing api request ' . $season->iracing_leagueId . " " . time());
+            return collect($allSessions->sessions)->map(function ($session) use ($season) {
+                $subsessionId = $session->subsession_id;
+                return [
+                    $subsessionId => [
+                        'season_id' => $season->id,
+                        'league_id' => $season->league_id,
+                        'iracing_subsession_id' => $session->subsession_id
+                    ],
+                ];
+            });
+        })->collapse();
+        $subsessionIds = [];
+        foreach($sessionData as $data) {
+            $subsessionIds[] = $data['iracing_subsession_id'];
+        }
+        $subsessionIdsExist = Session::whereIn('subsession_id', $subsessionIds)
+            ->select('id', 'league_id', 'subsession_id')
+            ->get()
+            ->keyBy('subsession_id');
+        $filteredSessionData = collect($sessionData)->filter(function ($data) use ($subsessionIdsExist) {
+            return isset($data['iracing_subsession_id']) && !$subsessionIdsExist->has($data['iracing_subsession_id']);
+        })->all();
+        foreach($filteredSessionData as $data) {
+            $json = $iracing->results->get($data['iracing_subsession_id'], ['include_licenses' => false]);
+            $this->newSessionSubmitFromAPI($json, $data['league_id'], $data['season_id']);
+        }
+    }
+
+    public function newSessionSubmitFromAPI($json, $leagueId, $seasonId) {
+        $data = $json;
+        $sessionId = $data->subsession_id;
+        $results = $data->session_results;
+
+        $sessionId = $data->subsession_id;
+        $results = $data->session_results;
+        $validSessionPattern = '/^(QUALIFY|CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
+        $sessionResultsToInsert = [];
+          foreach($results as $result){
+            //looping over race types (practice, qualy, heat, race, etc)
+            if(preg_match($validSessionPattern, $result->simsession_name)){
+                //looping over each driver in the session
+                foreach($result->results as $driver){
+                    $record = [
+                        'subsession_id' => $sessionId,
+                        'simsession_name' => $result->simsession_name,
+                        'finish_position' => ++$driver->finish_position,
+                        'race_points' => 0,
+                        'display_name' => $driver->display_name,
+                        'league_id' => $leagueId,
+                        'season_id' => $seasonId,
+                        'laps_lead' => $driver->laps_lead,
+                        'laps_completed' => $driver->laps_complete,
+                        'average_lap_time' => $this->convertTime($driver->average_lap),
+                        'best_lap_time' => $this->convertTime($driver->best_lap_time),
+                        'best_lap_number' => $driver->best_lap_num,
+                        'qualifying_lap_time' => $this->convertTime($driver->best_qual_lap_time),
+                        'starting_pos' => ++$driver->starting_position,
+                        'interval' => $this->convertTime($driver->interval),
+                        'incidents' => $driver->incidents,
+                        'club_name' => $driver->club_name,
+                        'license_category' => $data->license_category,
+                        'corners_per_lap' => $data->corners_per_lap,
+                        'track_name' => $data->track->track_name,
+                        'config_name' => $data->track->config_name,
+                        'temp_value' => $data->weather->temp_value,
+                        'temp_units' => $data->weather->temp_units,
+                        'rel_humidity' => $data->weather->rel_humidity,
+                        'race_date' => Carbon::parse($data->start_time)->format('Y-m-d')
+                    ];
+                    $sessionResultsToInsert[] = $record;
+                }
+            }
+          }
+          Session::upsert($sessionResultsToInsert, [
+            'subsession_id',
+            'simsession_name',
+            'finish_position',
+            'race_points',
+            'display_name',
+            'league_id',
+            'season_id',
+            'laps_lead',
+            'laps_completed',
+            'average_lap_time',
+            'best_lap_time',
+            'best_lap_number',
+            'qualifying_lap_time',
+            'starting_pos',
+            'interval',
+            'incidents',
+            'club_name',
+            'license_category',
+            'corners_per_lap',
+            'track_name',
+            'config_name',
+            'temp_value',
+            'temp_units',
+            'rel_humidity',
+            'race_date'
+          ]);
+          $sessionResults = Session::where('subsession_id', $sessionId)
+          ->get(['id', 'simsession_name', 'finish_position', 'interval', 'laps_completed', 'best_lap_time']);
+          $this->setIntervalByLeader($sessionResults);
+          $unique_types = $sessionResults->unique('simsession_name');
+          $fastest_lap_points = Scoring::select('fastest_lap')->where('season_id', $seasonId)->get();
+          foreach($unique_types as $key => $type) {
+            $driver = $this->getFastestDriver($sessionResults, $type->simsession_name);
+            $driver->fastest_lap_points = json_decode($fastest_lap_points[0]->fastest_lap);
+            $driver->save();
+          }
+        }
 }

@@ -38,6 +38,8 @@ Route::post('/league/{leagueId}/delete', '\App\Http\Controllers\LeagueController
 Route::post('/league/{leagueId}/{seasonId}', '\App\Http\Controllers\SeasonController@newSessionSubmit');
 Route::post('season/{id}/scoring', '\App\Http\Controllers\SeasonController@updateScoring');
 Route::post('/season/{id}/delete/{sessionId}', '\App\Http\Controllers\SeasonController@deleteSession');
+Route::post('/season/{id}/get', '\App\Http\Controllers\SeasonController@getiRacingSeasonData');
+Route::post('/season/{id}/update', '\App\Http\Controllers\SeasonController@updateSeasonWithiRacingSync');
 Route::post('/session/{sessionId}/add-penalty', '\App\Http\Controllers\SessionController@submitPenalties');
 
 Route::get('/league/create-league', function() {return view('league.create_league');})->name('create_league');
@@ -46,6 +48,6 @@ Route::get('league/{leagueId}', '\App\Http\Controllers\LeagueController@showLeag
 Route::get('session/{sessionId}', '\App\Http\Controllers\SessionController@showSession');
 Route::get('season/{id}', '\App\Http\Controllers\SeasonController@showSeason')->name('season.showSeason');
 Route::get('season/{id}/scoring', '\App\Http\Controllers\SeasonController@editScoring');
-Route::get('season/{id}/standings', '\App\Http\Controllers\SeasonController@showStandings');
+Route::get('season/{id}/standings', '\App\Http\Controllers\StandingsController@showStandings');
 
 require __DIR__.'/auth.php';

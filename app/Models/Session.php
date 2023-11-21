@@ -31,7 +31,13 @@ class Session extends Model
             $this->interval = Str::after($this->interval, ':')+($minutes * 60);
         }
         return $this->interval + $this->penalty_seconds;
-        // Session::where('simsession_name', 'FEATURE')->Where('subsession_id',36314990)->Where('interval','NOT LIKE','%laps')->get(['interval','display_name','finish_position','penalty_seconds'])
-        //$c->sortBy('actualInterval')
+    }
+
+    public function scopeFastestLap($query, $sessionId, $simsessionName) {
+        return $query->where('subsession_id', $sessionId)
+            ->where('simsession_name', $simsessionName)
+            ->where('best_lap_time', '<>', '-')
+            ->orderBy('best_lap_time')
+            ->first();
     }
 }

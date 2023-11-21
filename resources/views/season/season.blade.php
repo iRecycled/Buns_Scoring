@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title> {{ $league->name }}</title>
   <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <script src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 </head>
 
     <x-app-layout class="flex flex-col min-h-screen">
-        @if ($errors->any())
+    @if ($errors->any())
         <div class="flex p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
             <span class="sr-only">Error</span>
             <div>
@@ -21,6 +22,15 @@
             </div>
         </div>
     @endif
+    @if (session()->has('success'))
+        <div class="flex p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+            <svg aria-hidden="true" class="flex-shrink-0 inline w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+            <div>
+                <span class="font-medium">{{ session('success')}}</span>
+            </div>
+        </div>
+    @endif
+
         <div class="flex flex-row flex-1">
           <main class="w-64 bg-white-100 flex-0 sm:flex-2">
           </main>
@@ -35,11 +45,14 @@
                             <h1 class="text-4xl font-bold text-center">{{ $league->name }}</h1>
                         </div>
                         @if (Auth::check() && Auth::id() == $league->league_owner_id)
+                        <div class="absolute top-4 left-4">
+                            <button class="show-api-modal text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">API Import</button>
+                        </div>
                             <div class="pr-6 absolute top-4 right-36">
                                 <a href="/season/{{$seasonId}}/scoring", class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Edit Scoring</a>
                             </div>
                             <div>
-                                <button href="" id="modal-button" class="text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100 absolute top-4 right-4">Import session
+                                <button href="" class="import-session-btn text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100 absolute top-4 right-4">Import session
                                 </button>
                             </div>
                         @endif
@@ -49,13 +62,12 @@
             </div>
 
             <div class="p-5 my-10  flex justify-center items-center">
-                <!-- Modal container -->
-                <div id="modal" class="hidden fixed top-0 left-0 w-full h-full flex items-center justify-center">
-                    <!-- Modal content -->
+                <!-- Import Session Modal -->
+                <div id="modal" class="hidden import-session-modal fixed top-0 left-0 w-full h-full flex items-center justify-center">
                     <div id="main-modal" class="bg-gray-400 rounded-xl p-3 mx-auto shadow-xl overflow-y-auto">
                         <form method="POST" action={{ url("/league/" . $league->leagueId . "/" . $seasonId) }} enctype="multipart/form-data">
                             @csrf
-                        <button type="button" class="float-right pr-2 close" data-dismiss="main-modal" id="close">&times;</button>
+                        <button type="button" class="float-right pr-2 close close-session-btn" id="close">&times;</button>
                         <h2 class="text-2xl font-bold py-4 ml-5">Import Session JSON file</h2>
                         <input type="file" class="ml-5" name="json_file" accept=".json">
                         <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 my-5 rounded focus:outline-none
@@ -94,7 +106,6 @@
                                             </form>
                                         </td>
                                         @endif
-
                                       </tr>
                                     @endforeach
                                 </tbody>
@@ -102,7 +113,41 @@
                         </div>
                         <div class="pt-2 text-center">
                                 <a href="{{$seasonId}}/standings" class="text-black" > Season Standings </a>
+                        </div>
+
+        <!-- iRacing API Modal -->
+        <div class="hidden api-modal fixed top-0 left-0 w-full h-full flex items-center justify-center backdrop-filter-blur">
+            <div class="modal-dialog w-1/2 h-1/2">
+                <div class="modal-content p-6 bg-gray-200 border border-black rounded-lg">
+                <div class="text-header pb-2">
+                    <p>Put in your iRacing league Id and select the League Season that you want synced. Will then import any sessions for your league that are new. </p>
+                </div>
+                <form method="POST" action="{{$seasonId}}/update">
+                    <div class="flex flex-row">
+                            <div>
+                                <input type="text" class="ajaxUrl hidden" value="{{$seasonId}}/get/">
+                                <label for="iRacingLeagueId" class="block text-gray-700 text-sm font-bold mb-2">iRacing League Id:</label>
+                                <input type="text" name="iRacingLeagueId" class="shadow appearance-none border rounded py-2 px-3">
                             </div>
+                            <div>
+                                <button type="button" onclick="getSeasonFromLeagueId()" class="p-2 bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100 mt-7 ml-4 mb-10">Get Seasons</button>
+                            </div>
+                    </div>
+                    @csrf
+                    <div class="loader hidden"></div>
+
+                    <div id="seasonList">
+                    </div>
+
+                    <div class="modal-footer flex justify-center items-center">
+                        <button type="button" class="cancel-api-modal text-lg p-2 float-right bg-gray-400 hover:bg-gray-500 rounded-xl text-gray-100 m-6">Cancel</button>
+
+                        <button class="add-penalties text-lg p-2 float-right bg-blue-400 hover:bg-blue-500 rounded-xl text-gray-100">Save</button>
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
                     </div>
             </div>
             <div>
@@ -117,31 +162,79 @@
       </div>
 </x-app-layout>
 <script>
-    // Get the modal, button, and input elements
-    const modal = document.getElementById('modal');
-    const popup = document.getElementById('main-modal');
-    const button = document.getElementById('modal-button');
-    const submit = document.getElementById('modal-submit');
 
-    // When the button is clicked, toggle the modal's visibility
-    button.addEventListener('click', () => {
-    if (modal.classList.contains('hidden')) {
-        modal.classList.remove('hidden');
-        modal.classList.add('modal-open');
+    const apiModal = document.querySelector(".api-modal");
+    function toggleAPIModal() {
+        apiModal.classList.toggle('hidden');
     }
-    });
 
-    modal.addEventListener('click', (event) => {
-        if(!popup.contains(event.target)){
-            modal.classList.add('hidden');
-            modal.classList.remove('modal-open');
-        }
-    });
+    let apiBtn = document.querySelector(".show-api-modal");
+    apiBtn.addEventListener('click', toggleAPIModal);
+    const cancelApiBtn = document.querySelector(".cancel-api-modal");
+    cancelApiBtn.addEventListener('click', toggleAPIModal);
 
-    document.getElementById('delete-button').addEventListener('submit', function (event) {
+    const sessionModal = document.querySelector(".import-session-modal");
+    function toggleImportSessionModal() {
+        sessionModal.classList.toggle('hidden');
+    }
+
+    let sessionBtn = document.querySelector(".import-session-btn");
+    sessionBtn.addEventListener('click', toggleImportSessionModal);
+    let closeSessionBtn = document.querySelector(".close-session-btn");
+    closeSessionBtn.addEventListener('click', toggleImportSessionModal);
+
+    document.getElementById('delete-button')?.addEventListener('submit', function (event) {
         event.preventDefault();
         this.submit();
     });
+
+    const loader = document.querySelector('.loader');
+    function toggleLoader() {
+        loader.classList.toggle('hidden');
+    }
+
+    function clearSeasonList() {
+        const seasonList = document.getElementById("seasonList");
+        while (seasonList.firstChild) {
+            seasonList.removeChild(seasonList.firstChild);
+        }
+    }
+
+
+    function getSeasonFromLeagueId() {
+        const ajaxURL = document.querySelector(".ajaxUrl").value;
+        var dataToSend = $('input[name="iRacingLeagueId"]').val();
+        this.clearSeasonList();
+        this.toggleLoader();
+        $.ajax({
+            data: {
+                "_token": "{{ csrf_token() }}",
+                iRacingLeagueId: dataToSend,
+                },
+            url: ajaxURL,
+            method: 'POST',
+            success: function (data) {
+                toggleLoader();
+                var seasonList = $("#seasonList");
+                seasonList.empty();
+                if(data.length == 0) {
+                    var seasonList = $("#seasonList");
+                    var par = $('<p class="pb-4"> No Seasons exist for League Id ' + dataToSend + '. </p>');
+                    seasonList.append(par);
+                } else {
+                    var par = $('<p class="pb-4"> Please select one season to sync. </p>');
+                    $.each(data, function (seasonId, seasonName) {
+                    var radioLabel = $('<label><input type="radio" name="iRacingSeasonId" value="' + seasonId + '" /> ' + seasonName + '</label><br>');
+                    seasonList.append(radioLabel);
+                });
+                }
+
+            },
+            error: function (xhr, status, error) {
+                toggleLoader();
+            }
+        });
+}
 
   </script>
 </html>

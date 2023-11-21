@@ -3,10 +3,8 @@
 namespace App\Http\Controllers;
 use App\Models\Session;
 use App\Models\Scoring;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class SessionController extends Controller
 {
@@ -16,14 +14,13 @@ class SessionController extends Controller
         $league = $sessions->first()->league;
         $unique_types = $sessions->unique('simsession_name');
         $drivers = $sessions->pluck('display_name')->unique();
-        $currentData = Session::select('penalty_seconds','penalty_points','display_name','simsession_name')
-        ->whereNotNull('penalty_seconds')
-        ->orWhereNotNull('penalty_points')
-        ->where('subsession_id',$sessionId)->get();
+        $currentData = $sessions->filter(function ($session) {
+            return $session->penalty_seconds !== null || $session->penalty_points !== null;
+        })->pluck('penalty_seconds', 'penalty_points', 'display_name', 'simsession_name');
         foreach($unique_types as $type) {
             $types[] = $type->simsession_name;
         }
-        $calculatedResults = $this->updateIntervalByPenalties($sessionId, $types);
+        $calculatedResults = $this->updateIntervalByPenalties($sessions, $types);
         $calculatedResults = $this->convertIntervalBackToMinutes($calculatedResults);
         $this->updateRacePoints($season_id, $calculatedResults);
         return view('session.session', compact(
@@ -36,6 +33,13 @@ class SessionController extends Controller
             'currentData',
             'calculatedResults'
         ));
+    }
+
+    private function getFastestDriver($collection, $simsession_name) {
+        return $collection->where('simsession_name', $simsession_name)
+        ->where('best_lap_time', '<>', '-')
+        ->sortBy('best_lap_time')
+        ->first();
     }
 
     public function submitPenalties(Request $request, $sessionId){
@@ -67,40 +71,47 @@ class SessionController extends Controller
         return redirect("/session/{$sessionId}");
     }
 
-    private function updateIntervalByPenalties($subsession_id, $session_types){
+    private function updateIntervalByPenalties($sessionData, $session_types){
         $mergedResultsForAllSessions = new Collection();
+        $leadLappers = $sessionData->filter(function ($session) {
+            return strpos($session['interval'], 'laps') == false;
+        });
+        $lappedDrivers = $sessionData->filter(function ($session) {
+            return strpos($session['interval'], 'laps') == true;
+        });
         foreach ($session_types as $key => $session) {
-            $leadLappers = Session::where('simsession_name', $session)->where('subsession_id',$subsession_id)->where('interval','NOT LIKE','%laps')->get();
-            $lappedDrivers = Session::where('simsession_name', $session)->where('subsession_id',$subsession_id)->where('interval','LIKE','%laps')->get();
-
+            $sessionLappers = $leadLappers->filter(function ($item) use ($session) {
+                return $item->simsession_name == $session;
+            });
+            $sessionDrivers = $lappedDrivers->filter(function ($item) use ($session) {
+                return $item->simsession_name == $session;
+            });
             $index = 1;
-            $mergedResults = $leadLappers->sortBy('actualInterval')->concat($lappedDrivers);
+            $mergedResults = $sessionLappers->sortBy('actualInterval')->concat($sessionDrivers);
             foreach ($mergedResults as $key => $result) {
                 $mergedResults[$key]->finish_position = $index;
                 $index++;
             }
             $mergedResultsForAllSessions = $mergedResultsForAllSessions->concat($mergedResults);
         }
+        $mergedResultsForAllSessions->each->save();
         return $mergedResultsForAllSessions;
     }
 
     private function convertIntervalBackToMinutes($results){
-        $tempResults = [];
-        try {
-            foreach ($results as $key => $result) {
-                if ($result->actualInterval > 60) {
-                    $minutes = floor($result->actualInterval / 60);
-                    $remainingSeconds = $result->actualInterval % 60;
-                    $milliseconds = substr(sprintf('%0.3f', $result->actualInterval - floor($result->actualInterval)), 2);
-                    $result->interval = "{$minutes}:" . str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . ".{$milliseconds}";
-                } else if(strpos($result->actualInterval, "laps") == false ){
-                    $remainingSeconds = $result->actualInterval % 60;
-                    $milliseconds = substr(sprintf('%0.3f', $result->actualInterval - floor($result->actualInterval)), 2);
-                    $result->interval = str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . ".{$milliseconds}";
-                }
-                $tempResults[] = $result;
+        $tempResults = new Collection();
+        foreach ($results as $key => $result) {
+            if ($result->actualInterval > 60) {
+                $minutes = floor($result->actualInterval / 60);
+                $remainingSeconds = $result->actualInterval % 60;
+                $milliseconds = substr(sprintf('%0.3f', $result->actualInterval - floor($result->actualInterval)), 2);
+                $result->interval = "{$minutes}:" . str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . ".{$milliseconds}";
+            } else if(strpos($result->actualInterval, "laps") == false ){
+                $remainingSeconds = $result->actualInterval % 60;
+                $milliseconds = substr(sprintf('%0.3f', $result->actualInterval - floor($result->actualInterval)), 2);
+                $result->interval = str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . ".{$milliseconds}";
             }
-        } catch (Exception $e){
+            $tempResults[$key] = $result;
         }
         return $tempResults;
     }
@@ -112,36 +123,10 @@ class SessionController extends Controller
             $heat_points = json_decode($scoringQuery[0]->heat, true);
             $consolation_points = json_decode($scoringQuery[0]->consolation, true);
             $feature_points = json_decode($scoringQuery[0]->feature, true);
-            $fastest_lap_points = $scoringQuery[0]->fastest_lap;
 
-            $fastestDrivers = [];
-            $lowestFastestLapTime = null;
-            $polePositionDrivers = [];
             $validSessionPattern = '/^(QUALIFY|CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
-            $validSessionPatternWithoutQualy = '/^(CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
-            foreach($results as $racer){
-                if(preg_match($validSessionPattern, $racer->simsession_name)){
-                    if (preg_match($validSessionPatternWithoutQualy, $racer->simsession_name)) {
-                        if($racer->best_lap_time != '-'){
-                            if(strpos($racer->best_lap_time, ':') != false) {
-                                list($minutes, $seconds) = explode(':', $racer->best_lap_time);
-                            } else {
-                                $minutes = 0;
-                                $seconds = $racer->best_lap_time;
-                            }
-                            list($wholeSeconds, $milliseconds) = explode('.', $seconds);
-                            $totalSeconds = $minutes * 60 + $wholeSeconds + ($milliseconds / 1000);
-                            $sessionType = $racer->simsession_name;
-                            if (!isset($lowestFastestLapTime[$sessionType]) || $totalSeconds < $lowestFastestLapTime[$sessionType]) {
-                                $lowestFastestLapTime[$sessionType] = $totalSeconds;
-                                $fastestDrivers[$sessionType] = $racer;
-                            }
-                            if ($racer->starting_pos == 1){
-                                $polePositionDrivers[$sessionType] = $racer;
-                            }
-                        }
-
-                    }
+            foreach($results as $key => $racer){
+                if(preg_match($validSessionPattern, $racer->simsession_name)) {
                     switch ($racer->simsession_name) {
                         case 'QUALIFY':
                             $racer->race_points = $qualy_points[$racer->finish_position];
@@ -154,22 +139,17 @@ class SessionController extends Controller
                             $racer->race_points = $feature_points[$racer->finish_position];
                             break;
                         default:
-                            if(strpos($racer->simsession_name, 'HEAT') != false){
+                        if(str_contains($racer->simsession_name, "HEAT")){
                                 $racer->race_points = $heat_points[$racer->finish_position];
                             }
+
                             break;
                       }
-                      Session::where('id', $racer->id)->update(['race_points' => $racer->race_points]);
+                }
+                if($racer->fastest_lap_points > 0 && $racer->simsession_name != "QUALIFY"){
+                    $racer->race_points += $racer->fastest_lap_points;
                 }
             }
-            foreach($fastestDrivers as $driver){
-                $driver->race_points = (int)$driver->race_points + (int)$fastest_lap_points;
-            }
-            $driverIdsFastest = array_column($fastestDrivers, 'id');
-            Session::whereIn('id', $driverIdsFastest)
-                ->update([
-                    'race_points' => DB::raw('race_points + ' . (int)$fastest_lap_points)
-                ]);
         }
     }
 
