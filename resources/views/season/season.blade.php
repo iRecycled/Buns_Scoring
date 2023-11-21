@@ -203,6 +203,7 @@
 
     function getSeasonFromLeagueId() {
         const ajaxURL = document.querySelector(".ajaxUrl").value;
+        console.log(ajaxURL);
         var dataToSend = $('input[name="iRacingLeagueId"]').val();
         this.clearSeasonList();
         this.toggleLoader();
