@@ -113,7 +113,7 @@
                                     <label class="showDropWeekOptions">Number of lowest score races to drop</label>
                                 </div>
                                 <div class="p-2">
-                                    <input type="text" name="races_to_drop" class="rounded-lg p-2 w-10 showDropWeekOptions" value="4">
+                                    <input type="text" name="races_to_drop" class="rounded-lg p-2 w-10 showDropWeekOptions" value={{$races_to_drop}}>
                                 </div>
                             </div>
                         </div>

@@ -69,7 +69,9 @@ class StandingsController extends Controller
                     $racesToDrop = $lowestRacesToDrop;
                 }
             }
-
+            $NoDroptotalPoints = $sessions->sum('race_points');
+            $totalPointsWithDrop = $sessions->first()->total_points;
+            $pointsDropped = $NoDroptotalPoints - $totalPointsWithDrop;
             return [
                 'display_name' => $displayName,
                 'total_points' => isset($sessions->first()->total_points) ? $sessions->first()->total_points : $sessions->sum('race_points'),
@@ -78,14 +80,15 @@ class StandingsController extends Controller
                 'total_races' => $totalRaces,
                 'total_lead' => $sessions->sum('laps_lead'),
                 'total_wins' => $sessions->where('finish_position', 1)->count(),
-                'races_dropped' => $racesToDrop
+                'races_dropped' => $racesToDrop,
+                'points_dropped' => $pointsDropped
             ];
         });
         $standings = $standings->sortByDesc('total_points');
         // $standings = $standings->sortByDesc('total_points')->values();
         $league = $seasons->first()->league;
 
-        return view ('season.standings.standings', compact('seasonId', 'standings', 'league'));
+        return view ('season.standings.standings', compact('seasonId', 'standings', 'league','dropWeeksEnabled'));
     }
 
     private function applyDropWeeks($sessions, $scoringQuery){
@@ -111,6 +114,7 @@ class StandingsController extends Controller
                 } else {
                     $racesToDrop = $lowestRacesToDrop;
                 }
+
                 // $pointsRemovedByDrops = array_sum(array_slice($raceResults, -$racesToDrop)); //helpful to check if this is working
                 $raceResults = array_slice($raceResults, 0, -$racesToDrop);
             }

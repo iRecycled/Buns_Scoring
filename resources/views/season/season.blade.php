@@ -202,12 +202,11 @@
 
     function getSeasonFromLeagueId() {
         let url = window.location.href;
-        if (!url.startsWith('https://')) {
+        if (!url.includes('localhost') && !url.startsWith('https://')) {
             url = url.replace(/^https?:\/\//i, '');
             url = 'https://' + url;
         }
         url += '/get';
-        console.log(url);
         var dataToSend = $('input[name="iRacingLeagueId"]').val();
         this.clearSeasonList();
         this.toggleLoader();

@@ -45,7 +45,10 @@
                                         <th class="px-4">Incidents</th>
                                         <th class="px-2">Races</th>
                                         <th class="px-4">Wins</th>
-                                        <th class="px-4">Dropped Races</th>
+                                        @if ($dropWeeksEnabled)
+                                            <th class="px-4">Dropped Races</th>
+                                            <th class="px-4">Points Dropped</th>
+                                        @endif
 
                                       </tr>
                                     </thead>
@@ -62,7 +65,10 @@
                                           <td>{{ $user['total_incidents'] }}</td>
                                           <td>{{ $user['total_races'] }}</td>
                                           <td>{{ $user['total_wins'] }}</td>
-                                          <td>{{ $user['races_dropped'] }}</td>
+                                          @if ($dropWeeksEnabled)
+                                            <td>{{ $user['races_dropped'] }}</td>
+                                            <td>{{ $user['points_dropped'] }}</td>
+                                          @endif
 
                                         </tr>
                                       @endforeach
