@@ -102,7 +102,6 @@ class StandingsController extends Controller
             }
             $qualyResultsByDriver[$driverName][] = $racePoints;
         }
-        dd($raceResultsByDriver);
         foreach ($raceResultsByDriver as $driverName => &$raceResults) {
             arsort($raceResults);
             if(count($raceResults) > $startOfDropWeekScoring) {
