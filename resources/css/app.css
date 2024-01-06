@@ -52,15 +52,6 @@ tbody tr:hover td a {
     color: #E829F1;
 }
 
-/* Show element */
-.showDropWeekOptions.visible {
-    visibility: visible;
-}
-
-.showDropWeekOptions {
-    visibility: hidden;
-}
-
 @-webkit-keyframes spin {
     0% { -webkit-transform: rotate(0deg); }
     100% { -webkit-transform: rotate(360deg); }

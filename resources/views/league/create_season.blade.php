@@ -95,30 +95,37 @@
                                 <div class="p-2">
                                     <input type="text" id="fastest_lap" name="fastest_lap" class="rounded-lg p-2 w-10" value="0">
                                 </div>
-                                {{-- <div class="flex items-center p-2">
-                                    <label for="pole_position">Pole Position</label>
-                                </div>
-                                <div class="p-2">
-                                    <input type="text" id="pole_position" name="pole_position" class="rounded-lg p-2 w-10" value="0">
-                                </div> --}}
 
                                 <div class="flex items-center inline-flex">
                                     <p class="p-2"> Drop weeks enabled: </p>
                                     <input type="checkbox" name="enabled_drop_weeks" class="form-checkbox h-5 w-5 text-blue-600 ml-10 rounded-sm enabled_drop_weeks" value="true">
                                 </div>
                                 <div class="flex"></div>
-                                <div class="flex items-center p-2">
-                                    <label class="showDropWeekOptions">Number of races before drop weeks start</label>
+                                <div class="flex items-center p-2 showDropWeekOptions">
+                                    <label>Number of races before drop weeks start</label>
                                 </div>
-                                <div class="p-2">
-                                    <input type="text" id="raceCountBeforeDropWeeks" name="start_of_drop_score" class="rounded-lg p-2 w-10 showDropWeekOptions" value="8">
+                                <div class="p-2 showDropWeekOptions">
+                                    <input type="text" id="raceCountBeforeDropWeeks" name="start_of_drop_score" class="rounded-lg p-2 w-10" value="8">
                                 </div>
-                                <div class="flex items-center p-2">
-                                    <label class="showDropWeekOptions">Number of lowest score races to drop</label>
+                                <div class="flex items-center p-2 showDropWeekOptions">
+                                    <label>Number of lowest score races to drop</label>
                                 </div>
-                                <div class="p-2">
-                                    <input type="text" id="countOfDroppedRaces" name="races_to_drop" class="rounded-lg p-2 w-10 showDropWeekOptions" value="4">
+                                <div class="p-2 showDropWeekOptions">
+                                    <input type="text" id="countOfDroppedRaces" name="races_to_drop" class="rounded-lg p-2 w-10" value="4">
                                 </div>
+                                <div class="flex items-center inline-flex">
+                                    <p class="p-2"> Scored by % of laps completed: </p>
+                                    <input type="checkbox" name="enabled_percentage_laps" class="form-checkbox h-5 w-5 text-blue-600 ml-10 rounded-sm percentageCheckbox" value="true">
+                                </div>
+                                <div class="flex"></div>
+                                <div class="flex items-center p-2 showPercentageOptions">
+                                    <label class="">Percentage of race completed before scoring:</label>
+                                </div>
+                                <div class="p-2 showPercentageOptions">
+                                    <input type="text" id="lap_percentage_to_complete" name="lap_percentage_to_complete" class="rounded-lg p-2 w-10" min="0" max="100" value="25" style="margin-right: 5px;">
+                                    <span>%</span>
+                                </div>
+
                             </div>
                         </div>
                         <br>
@@ -186,9 +193,9 @@
                 allowDropWeeksCheckbox.addEventListener('change', function () {
                     showDropWeekOptions.forEach((element) => {
                         if (!this.checked) {
-                            element.classList.remove('visible');
+                            element.classList.add('hidden');
                         } else {
-                            element.classList.add('visible');
+                            element.classList.remove('hidden');
                         }
                     })
                 });
@@ -197,12 +204,38 @@
                 showDropWeekOptions.forEach((element) => {
                         if (areDropWeeksEnabled) {
                             allowDropWeeksCheckbox.checked = true;
-                            element.classList.add('visible');
+                            element.classList.remove('hidden');
                         } else {
                             allowDropWeeksCheckbox.checked = false;
+                            element.classList.add('hidden');
+                        }
+                    });
+
+                const lapPercentageCheckbox = document.querySelector('.percentageCheckbox');
+                const showPercentageOptions = document.querySelectorAll('.showPercentageOptions');
+
+                lapPercentageCheckbox.addEventListener('change', function () {
+                    showPercentageOptions.forEach((element) => {
+                        if (lapPercentageCheckbox.checked) {
+                            element.classList.remove('hidden');
+                        } else {
+                            element.classList.add('hidden');
+                        }
+                    })
+                });
+
+                const isScoringByPercentEnabled = lapPercentageCheckbox.checked;
+                showPercentageOptions.forEach((element) => {
+                        if (isScoringByPercentEnabled) {
+                            lapPercentageCheckbox.checked = true;
+                            element.classList.add('visible');
+                        } else {
+                            lapPercentageCheckbox.checked = false;
                             element.classList.remove('visible');
                         }
                     });
+
+
                 extraBody.className = "";
                 const extra = document.getElementById('extra');
                 extra.className = "tab-link inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active";

@@ -20,9 +20,15 @@ class SessionController extends Controller
         foreach($unique_types as $type) {
             $types[] = $type->simsession_name;
         }
+        //key value pair for session_name and lead drivers laps completed
+        foreach($types as $session_name) {
+            $sessionTypesWithRaceLaps[$session_name] = $sessions->filter(function ($driver) use ($session_name) {
+                return $driver->simsession_name == $session_name && $driver->finish_position == 1;
+            })->first()->laps_completed;
+        }
         $calculatedResults = $this->updateIntervalByPenalties($sessions, $types);
         $calculatedResults = $this->convertIntervalBackToMinutes($calculatedResults);
-        $this->updateRacePoints($season_id, $calculatedResults);
+        $this->updateRacePoints($season_id, $calculatedResults, $sessionTypesWithRaceLaps);
         return view('session.session', compact(
             'sessions',
             'sessionId',
@@ -109,13 +115,16 @@ class SessionController extends Controller
         return $tempResults;
     }
 
-    private function updateRacePoints($seasonId, $results){
+    private function updateRacePoints($seasonId, $results, $sessionTypesWithRaceLaps){
         $scoringQuery = Scoring::where('season_id', $seasonId)->get();
         if($scoringQuery) {
             $qualy_points = json_decode($scoringQuery[0]->qualifying, true);
             $heat_points = json_decode($scoringQuery[0]->heat, true);
             $consolation_points = json_decode($scoringQuery[0]->consolation, true);
             $feature_points = json_decode($scoringQuery[0]->feature, true);
+
+            $percentLapsEnabled = $scoringQuery[0]->enabled_percentage_laps;
+            $percentLapsValue = $scoringQuery[0]->lap_percentage_to_complete;
 
             $validSessionPattern = '/^(QUALIFY|CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
             foreach($results as $key => $racer){
@@ -135,9 +144,13 @@ class SessionController extends Controller
                         if(str_contains($racer->simsession_name, "HEAT")){
                                 $racer->race_points = $heat_points[$racer->finish_position];
                             }
-
                             break;
                       }
+                }
+
+                $minLaps = (int) $sessionTypesWithRaceLaps[$racer->simsession_name] * ($percentLapsValue / 100);
+                if($percentLapsEnabled && $racer->laps_completed < $minLaps && $racer->simsession_name != "QUALIFY") {
+                    $racer->race_points = 0;
                 }
                 if($racer->fastest_lap_points > 0 && $racer->simsession_name != "QUALIFY"){
                     $racer->race_points += $racer->fastest_lap_points;

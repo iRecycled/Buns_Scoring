@@ -15,8 +15,7 @@ use PhpParser\Node\Expr\Cast\Bool_;
 
 class SeasonController extends Controller
 {
-    public function createSeason(Request $request)
-    {
+    public function createSeason(Request $request) {
         $request->validate([
             'season_name' => 'required',
         ]);
@@ -38,6 +37,8 @@ class SeasonController extends Controller
             $scoring->enabled_drop_weeks = boolval($dropWeeksEnabledInput);
             $scoring->drop_weeks_start = $request->start_of_drop_score;
             $scoring->races_to_drop = $request->races_to_drop;
+            $scoring->enabled_percentage_laps = boolval($request->enabled_percentage_laps);
+            $scoring->lap_percentage_to_complete = $request->lap_percentage_to_complete;
             $scoring->save();
 
             return redirect()->route('league.showLeague', ['leagueId' => $season->league_id])->with('success', 'Season created successfully');
@@ -69,6 +70,8 @@ class SeasonController extends Controller
             $scoring->enabled_drop_weeks = boolval($request->enabled_drop_weeks);
             $scoring->drop_weeks_start = (int) $request->start_of_drop_score;
             $scoring->races_to_drop = (int) $request->races_to_drop;
+            $scoring->enabled_percentage_laps = boolval($request->enabled_percentage_laps);
+            $scoring->lap_percentage_to_complete = $request->lap_percentage_to_complete;
             $scoring->save();
             DB::commit();
             return redirect("/season/". $seasonId)->with('success', 'Scoring updated successfully');
@@ -105,8 +108,11 @@ class SeasonController extends Controller
         $drop_week_enabled = $enabled_drop_weeks ? true : false;
         $drop_week_start = Scoring::select('drop_weeks_start')->where('season_id',$seasonId)->value('drop_weeks_start');
         $races_to_drop = Scoring::select('races_to_drop')->where('season_id',$seasonId)->value('races_to_drop');
+        $percentLapsValue = Scoring::select('enabled_percentage_laps')->where('season_id', $seasonId)->value('enabled_percentage_laps');
+        $enabled_percentage_laps = $percentLapsValue ? true : false;
+        $lap_percentage_to_complete = Scoring::select('lap_percentage_to_complete')->where('season_id', $seasonId)->value('lap_percentage_to_complete');
 
-        return view('season.editScoring', compact('league', 'season', 'qualifying', 'heat', 'consolation', 'feature', 'fastest_lap', 'drop_week_enabled', 'drop_week_start', 'races_to_drop'));
+        return view('season.editScoring', compact('league', 'season', 'qualifying', 'heat', 'consolation', 'feature', 'fastest_lap', 'drop_week_enabled', 'drop_week_start', 'races_to_drop', 'enabled_percentage_laps', 'lap_percentage_to_complete'));
     }
 
     public function showSeason($seasonId){
@@ -406,8 +412,10 @@ class SeasonController extends Controller
           $fastest_lap_points = Scoring::select('fastest_lap')->where('season_id', $seasonId)->get();
           foreach($unique_types as $key => $type) {
             $driver = $this->getFastestDriver($sessionResults, $type->simsession_name);
-            $driver->fastest_lap_points = json_decode($fastest_lap_points[0]->fastest_lap);
-            $driver->save();
+            if($driver) {
+                $driver->fastest_lap_points = json_decode($fastest_lap_points[0]->fastest_lap) || 0;
+                $driver->save();
+            }
           }
         }
 }

@@ -20,7 +20,17 @@ class StandingsController extends Controller
             $session = $seasonSessions->filter(function ($sesh) use ($subsession_id) {
                 return $sesh->subsession_id == $subsession_id;
             });
-            $tempStanding = $this->applySessionScoring($session, $seasonId);
+            $unique_types = $session->unique('simsession_name');
+            foreach($unique_types as $type) {
+                $types[] = $type->simsession_name;
+            }
+            //key value pair for session_name and lead drivers laps completed
+            foreach($types as $session_name) {
+                $sessionTypesWithRaceLaps[$session_name] = $session->filter(function ($driver) use ($session_name) {
+                    return $driver->simsession_name == $session_name && $driver->finish_position == 1;
+                })->first()->laps_completed;
+            }
+            $tempStanding = $this->applySessionScoring($session, $seasonId, $sessionTypesWithRaceLaps);
             $standings = $standings->concat($tempStanding);
         }
 
@@ -56,7 +66,7 @@ class StandingsController extends Controller
             $pointsDropped = $NoDroptotalPoints - $totalPointsWithDrop;
             return [
                 'display_name' => $displayName,
-                'total_points' => isset($sessions->first()->total_points) ? $sessions->first()->total_points + $fastestLaps->sum() : $sessions->sum('race_points') + $fastestLaps->sum(),
+                'total_points' => isset($sessions->first()->total_points) ? $sessions->first()->total_points/* + $fastestLaps->sum()*/ : $sessions->sum('race_points')/* + $fastestLaps->sum()*/,
                 'total_laps' => $sessions->sum('laps_completed'),
                 'total_incidents' => $sessions->sum('incidents'),
                 'total_races' => $totalRaces,
@@ -128,18 +138,21 @@ class StandingsController extends Controller
         return $finalTotalPointsByDriver;
     }
 
-    private function applySessionScoring($sessionData, $seasonId) {
+    private function applySessionScoring($sessionData, $seasonId, $sessionTypesWithRaceLaps) {
         $scoringQuery = Scoring::where('season_id', $seasonId)->get();
         $calculatedResults = $this->updateIntervalByPenalties($sessionData);
-        $calculatedResults = $this->updateRacePoints($scoringQuery, $calculatedResults);
+        $calculatedResults = $this->updateRacePoints($scoringQuery, $calculatedResults, $sessionTypesWithRaceLaps);
         return $calculatedResults;
     }
 
-    private function updateRacePoints($scoringQuery, $sessionData) {
+    private function updateRacePoints($scoringQuery, $sessionData, $sessionTypesWithRaceLaps) {
         $qualy_points = json_decode($scoringQuery[0]->qualifying, true);
         $heat_points = json_decode($scoringQuery[0]->heat, true);
         $consolation_points = json_decode($scoringQuery[0]->consolation, true);
         $feature_points = json_decode($scoringQuery[0]->feature, true);
+
+        $percentLapsEnabled = $scoringQuery[0]->enabled_percentage_laps;
+        $percentLapsValue = $scoringQuery[0]->lap_percentage_to_complete;
 
         $validSessionPattern = '/^(QUALIFY|CONSOLATION|RACE|FEATURE|HEAT( \d+)?)$/';
         foreach($sessionData as $key => $racer){
@@ -161,6 +174,10 @@ class StandingsController extends Controller
                         }
                         break;
                     }
+            }
+            $minLaps = (int) $sessionTypesWithRaceLaps[$racer->simsession_name] * ($percentLapsValue / 100);
+            if($percentLapsEnabled && $racer->laps_completed < $minLaps && $racer->simsession_name != "QUALIFY") {
+                $racer->race_points = 0;
             }
             if($racer->fastest_lap_points > 0 && $racer->simsession_name != "QUALIFY"){
                 $racer->race_points += $racer->fastest_lap_points;
