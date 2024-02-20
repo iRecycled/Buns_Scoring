@@ -10,6 +10,7 @@ use Exception;
 
 class StandingsController extends Controller
 {
+    public $highestRacesCount;
     public function showStandings($seasonId){
         $seasons = Season::where('id',$seasonId)->distinct()->get();
         $league = $seasons->first()->league;
@@ -28,7 +29,7 @@ class StandingsController extends Controller
             foreach($types as $session_name) {
                 $sessionTypesWithRaceLaps[$session_name] = $session->filter(function ($driver) use ($session_name) {
                     return $driver->simsession_name == $session_name && $driver->finish_position == 1;
-                })->first()->laps_completed;
+                })->first();
             }
             $tempStanding = $this->applySessionScoring($session, $seasonId, $sessionTypesWithRaceLaps);
             $standings = $standings->concat($tempStanding);
@@ -53,11 +54,9 @@ class StandingsController extends Controller
             $startOfDropWeekScoring = $scoringQuery[0]->drop_weeks_start;
             $lowestRacesToDrop = $scoringQuery[0]->races_to_drop;
             $racesToDrop = 0;
-            if($dropWeeksEnabled && $totalRaces > $startOfDropWeekScoring){
-                if((($totalRaces - $lowestRacesToDrop) <= $startOfDropWeekScoring)){
-                    $racesToDrop = abs($startOfDropWeekScoring - $totalRaces);
-                } else {
-                    $racesToDrop = $lowestRacesToDrop;
+            if($totalRaces > $startOfDropWeekScoring) {
+                if($this->highestRacesCount - $totalRaces < $lowestRacesToDrop){
+                    $racesToDrop = abs($this->highestRacesCount - $lowestRacesToDrop - $totalRaces);
                 }
             }
             $fastestLaps = $sessions->where('simsession_name', '!=', "QUALIFY")->whereNotNull('fastest_lap_points')->pluck('fastest_lap_points');
@@ -112,23 +111,32 @@ class StandingsController extends Controller
             }
             $qualyResultsByDriver[$driverName][] = $racePoints;
         }
-        foreach ($raceResultsByDriver as $driverName => &$raceResults) {
-            arsort($raceResults);
-            if(count($raceResults) > $startOfDropWeekScoring) {
-                $racesToDrop = $lowestRacesToDrop;
-                $totalRaces = count($raceResults);
-                if(($totalRaces - $lowestRacesToDrop) <= $startOfDropWeekScoring){
-                    $racesToDrop = abs($startOfDropWeekScoring - $totalRaces);
-                } else {
-                    $racesToDrop = $lowestRacesToDrop;
-                }
-
-                // $pointsRemovedByDrops = array_sum(array_slice($raceResults, -$racesToDrop)); //helpful to check if this is working
-                $raceResults = array_slice($raceResults, 0, -$racesToDrop);
+        //get highest number of races ran.
+        $highestRacesCount = 0;
+        foreach ($raceResultsByDriver as $raceResults) {
+            if($highestRacesCount < count($raceResults)){
+                $highestRacesCount = count($raceResults);
             }
         }
+        $this->highestRacesCount = $highestRacesCount;
+        foreach ($raceResultsByDriver as $driverName => &$raceResults) {
+            arsort($raceResults);
+            $racesRan = count($raceResults);
+            //number of races is greater than start of drop weeks
+            //ex. 8 races starts at 8
+            if($racesRan > $startOfDropWeekScoring) {
+                if($highestRacesCount - $racesRan < $lowestRacesToDrop){
+                    $racesToDrop = abs($highestRacesCount - $lowestRacesToDrop - $racesRan);
+                    $raceResults = array_slice($raceResults, 0, -$racesToDrop);
+                }
+                //$pointsRemovedByDrops = array_sum(array_slice($raceResults, -$racesToDrop)); //helpful to check if this is working
+                // dd($pointsRemovedByDrops, $driverName);
+            }
+            unset($raceResults); //reference is keeping the last element
+        }
         $finalTotalPointsByDriver = [];
-        // dd($raceResultsByDriver);
+        //dd($raceResultsByDriver);
+        //dd($qualyResultsByDriver);
         foreach ($raceResultsByDriver as $driverName => $raceResults) {
             $finalTotalPointsByDriver[$driverName] = array_sum($raceResults);
         }
@@ -175,7 +183,7 @@ class StandingsController extends Controller
                         break;
                     }
             }
-            $minLaps = (int) $sessionTypesWithRaceLaps[$racer->simsession_name] * ($percentLapsValue / 100);
+            $minLaps = (int) $sessionTypesWithRaceLaps[$racer->simsession_name]->laps_completed * ($percentLapsValue / 100);
             if($percentLapsEnabled && $racer->laps_completed < $minLaps && $racer->simsession_name != "QUALIFY") {
                 $racer->race_points = 0;
             }
